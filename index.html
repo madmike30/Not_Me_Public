@@ -2,29 +2,26 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <!-- הגדרות Viewport מחמירות למובייל ולמניעת זום -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- הגדרות PWA לאייפון (שמירה למסך הבית) -->
+    <!-- הגדרות PWA לאייפון -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="היצור הסודי">
     
     <title>היצור הסודי</title>
     
-    <!-- טעינת ספריות חיצוניות -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        /* מניעת תופעות הלוואי של גלישה ומגע באייפון */
         body { 
             font-family: 'Heebo', sans-serif; 
-            overscroll-behavior-y: none; /* מונע Pull-to-refresh */
-            -webkit-user-select: none; /* מניעת בחירת טקסט בספארי */
+            overscroll-behavior-y: none;
+            -webkit-user-select: none;
             user-select: none;
-            -webkit-tap-highlight-color: transparent; /* הסרת הריבוע האפור בלחיצה על כפתורים באייפון */
-            touch-action: manipulation; /* ביטול השהיית זום בלחיצה כפולה */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         
         .eliminated {
@@ -37,12 +34,10 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
         }
         
-        /* עיצוב פס גלילה מותאם אישית (אם כי ב-iOS זה כמעט לא נראה) */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
         
-        /* אינטראקציית ריחוף למשתמש (פעיל בעיקר בדסקטופ, אך לא מפריע במובייל) */
         @media (hover: hover) {
             .creature-svg-wrapper:hover svg {
                 transform: translateY(-8px) scale(1.08) !important;
@@ -51,14 +46,13 @@
             }
         }
         
-        /* אנימציות חיים מבוססות חומרה (GPU) לביצועים אופטימליים במובייל */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-6px); }
         }
         .animate-float {
             animation: float 4s ease-in-out infinite;
-            will-change: transform; /* רמז לדפדפן להשתמש בהאצת חומרה */
+            will-change: transform;
         }
 
         @keyframes shadow-pulse {
@@ -79,13 +73,11 @@
             animation: blink 5s infinite;
         }
         
-        /* משוב ויזואלי מהיר ללחיצות מסך מגע */
         button:active {
             transform: scale(0.95);
             transition: transform 0.1s;
         }
 
-        /* גלילה חלקה פנימית ל-iOS */
         .scrolling-container {
             -webkit-overflow-scrolling: touch;
         }
@@ -93,11 +85,16 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col p-4 pb-safe overflow-x-hidden">
 
-    <!-- כותרת מותאמת למסכים קטנים -->
+    <!-- כותרת ראשית כולל כפתור עזרה -->
     <header class="w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center bg-slate-800 p-4 rounded-2xl shadow-xl mb-4 border border-slate-700">
-        <div class="mb-3 md:mb-0 text-center md:text-right">
-            <h1 class="text-3xl font-black text-indigo-400 tracking-tight">👾 היצור הסודי</h1>
-            <p class="text-slate-400 mt-1 text-sm hidden sm:block">מנוע מולטימדיה ואנימציות חיים. מצא את היצור הנכון.</p>
+        <div class="mb-3 md:mb-0 text-center md:text-right flex items-center gap-3">
+            <button onclick="GameLogic.showHelp()" class="bg-indigo-600 hover:bg-indigo-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl shadow-lg transition-colors border border-indigo-400 touch-manipulation" title="איך משחקים?">
+                ?
+            </button>
+            <div>
+                <h1 class="text-3xl font-black text-indigo-400 tracking-tight">👾 היצור הסודי</h1>
+                <p class="text-slate-400 mt-1 text-sm hidden sm:block">גלו מי הוא היצור הסודי לפני שייגמרו לכם המטבעות.</p>
+            </div>
         </div>
         <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-inner w-full md:w-auto justify-center">
             <span class="text-slate-300 font-bold text-sm">מטבעות:</span>
@@ -107,7 +104,7 @@
 
     <main class="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 flex-1">
         
-        <!-- פאנל ניהול פעולות (מסודר אנכית למובייל) -->
+        <!-- פאנל ניהול פעולות -->
         <aside class="w-full lg:w-1/3 flex flex-col gap-4 order-2 lg:order-1">
             
             <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700">
@@ -126,14 +123,10 @@
 
             <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700">
                 <h2 class="text-lg font-bold text-yellow-400 mb-3 border-b border-slate-600 pb-2">פעולות מיוחדות</h2>
-                <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                <div class="grid grid-cols-1 gap-3">
                     <button onclick="GameLogic.buyHint()" id="btn-hint" class="bg-slate-700 hover:bg-slate-600 border border-yellow-500/30 text-white py-3 px-3 rounded-lg text-xs sm:text-sm font-bold transition-colors flex flex-col sm:flex-row justify-between items-center gap-2 touch-manipulation">
                         <span>💡 רמז סודי</span>
                         <span class="bg-yellow-500 text-slate-900 px-2 py-1 rounded text-[10px] font-black w-full sm:w-auto text-center">עלות: 1 🪙</span>
-                    </button>
-                    <button onclick="GameLogic.buyCombo()" id="btn-combo" class="bg-slate-700 hover:bg-slate-600 border border-purple-500/30 text-white py-3 px-3 rounded-lg text-xs sm:text-sm font-bold transition-colors flex flex-col sm:flex-row justify-between items-center gap-2 touch-manipulation">
-                        <span>⚡ שאלת קומבו</span>
-                        <span class="bg-purple-400 text-slate-900 px-2 py-1 rounded text-[10px] font-black w-full sm:w-auto text-center">עלות: 1 🪙</span>
                     </button>
                 </div>
             </div>
@@ -147,15 +140,14 @@
 
         </aside>
 
-        <!-- רשת הדמויות (מופיעה ראשונה במובייל) -->
+        <!-- רשת הדמויות -->
         <section class="w-full lg:w-2/3 order-1 lg:order-2">
-            <!-- מותאם ל-2 עמודות במסך אייפון סטנדרטי -->
             <div id="creatures-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3"></div>
         </section>
 
     </main>
 
-    <!-- מודל ניצחון/הפסד המכסה את כל המסך במובייל -->
+    <!-- מודל ניצחון/הפסד -->
     <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-50 transition-opacity backdrop-blur-md p-4">
         <div class="bg-slate-800 p-6 rounded-3xl border-2 max-w-sm w-full text-center shadow-2xl" id="modal-content">
             <h2 id="modal-title" class="text-3xl font-black mb-3"></h2>
@@ -166,10 +158,31 @@
         </div>
     </div>
 
+    <!-- מודל חוקי המשחק (עזרה) -->
+    <div id="help-modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-50 transition-opacity backdrop-blur-md p-4">
+        <div class="bg-slate-800 p-6 rounded-3xl border-2 border-indigo-500 max-w-md w-full text-right shadow-2xl relative">
+            <button onclick="GameLogic.closeHelp()" class="absolute top-4 left-4 text-slate-400 hover:text-white text-3xl font-bold leading-none touch-manipulation">&times;</button>
+            <h2 class="text-2xl font-black mb-4 text-indigo-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+                <span>📜</span> איך משחקים?
+            </h2>
+            <div class="space-y-4 text-slate-300 text-sm md:text-base leading-relaxed">
+                <p><strong class="text-white">המטרה:</strong> גלו מי הוא היצור הסודי מבין כל היצורים על המסך.</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong class="text-white">שאלו שאלות:</strong> בחרו קטגוריה ומאפיין (למשל: האם הצבע אדום?) כדי לסנן חשודים.</li>
+                    <li><strong class="text-white">פסלו דמויות:</strong> השתמשו בכפתור "פסול" מתחת לכל יצור כדי להחשיך אותו אם הוא לא מתאים.</li>
+                    <li><strong class="text-white">מטבעות זהב:</strong> נצלו אותם לרכישת רמזים סודיים שיעזרו לכם להתמקד בחיפוש.</li>
+                    <li><strong class="text-white">האשמה:</strong> בטוחים שמצאתם? לחצו על "זה הוא!". טעות אחת והמשחק נגמר באופן מיידי.</li>
+                </ul>
+            </div>
+            <button onclick="GameLogic.closeHelp()" class="mt-6 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl w-full transition-transform transform hover:scale-105 touch-manipulation shadow-md">
+                הבנתי, בואו נשחק!
+            </button>
+        </div>
+    </div>
+
     <script>
         /**
          * מנוע אודיו מבוסס Web Audio API
-         * מותאם לתקנות השתקת קול (Auto-play policy) של ספארי ב-iOS.
          */
         const AudioEngine = {
             ctx: null,
@@ -234,7 +247,6 @@
             }
         };
 
-        // הזרקת אירוע מגע (touchstart) הנדרש לפתיחת צינור השמע במכשירי אפל
         document.body.addEventListener('touchstart', () => AudioEngine.init(), { once: true });
         document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
 
@@ -297,7 +309,6 @@
                 const floatDelay = (Math.random() * -4).toFixed(2);
                 const blinkDelay = (Math.random() * -5).toFixed(2);
 
-                // הוספת pointer-events-none פותרת בעיות לחיצה ב-iOS
                 let svg = `<svg viewBox="0 0 100 100" class="w-20 h-20 sm:w-28 sm:h-28 drop-shadow-xl animate-float pointer-events-none" style="animation-delay: ${floatDelay}s" xmlns="http://www.w3.org/2000/svg">`;
                 
                 svg += `
@@ -388,7 +399,6 @@
             creatures: [],
             secretCreatureId: null,
             coins: 2,
-            isComboMode: false,
             
             els: {
                 grid: document.getElementById('creatures-grid'),
@@ -399,13 +409,12 @@
                 noHistoryMsg: document.getElementById('no-history-msg'),
                 coinsContainer: document.getElementById('coins-container'),
                 btnHint: document.getElementById('btn-hint'),
-                btnCombo: document.getElementById('btn-combo')
+                helpModal: document.getElementById('help-modal')
             },
 
             init() {
                 this.coins = 2;
-                this.isComboMode = false;
-                this.generateCreatures(10); // ירד ל-10 עקב צפיפות במסך מובייל
+                this.generateCreatures(10); 
                 
                 const randomIndex = Math.floor(Math.random() * this.creatures.length);
                 this.secretCreatureId = this.creatures[randomIndex].id;
@@ -440,6 +449,7 @@
 
             resetUI() {
                 document.getElementById('modal').classList.add('hidden');
+                this.els.helpModal.classList.add('hidden');
                 this.els.historyList.innerHTML = '';
                 this.els.historyList.appendChild(this.els.noHistoryMsg);
                 this.els.noHistoryMsg.style.display = 'block';
@@ -460,9 +470,8 @@
             updateButtonsState() {
                 const canBuy = this.coins > 0;
                 this.els.btnHint.disabled = !canBuy;
-                this.els.btnCombo.disabled = !canBuy || this.isComboMode;
                 
-                [this.els.btnHint, this.els.btnCombo].forEach(btn => {
+                [this.els.btnHint].forEach(btn => {
                     if (btn.disabled) {
                         btn.classList.add('opacity-50', 'cursor-not-allowed');
                     } else {
@@ -470,15 +479,9 @@
                     }
                 });
 
-                if (this.isComboMode) {
-                    this.els.btnAsk.innerHTML = `<span>⚡</span> קומבו`;
-                    this.els.btnAsk.classList.replace('bg-indigo-600', 'bg-purple-600');
-                    this.els.btnAsk.classList.replace('hover:bg-indigo-500', 'hover:bg-purple-500');
-                } else {
-                    this.els.btnAsk.innerHTML = `<span>❓</span> שאל שאלה`;
-                    this.els.btnAsk.classList.replace('bg-purple-600', 'bg-indigo-600');
-                    this.els.btnAsk.classList.replace('hover:bg-purple-500', 'hover:bg-indigo-500');
-                }
+                this.els.btnAsk.innerHTML = `<span>❓</span> שאל שאלה`;
+                this.els.btnAsk.classList.replace('bg-purple-600', 'bg-indigo-600');
+                this.els.btnAsk.classList.replace('hover:bg-purple-500', 'hover:bg-indigo-500');
             },
 
             populateDropdowns() {
@@ -522,7 +525,6 @@
                     const charObj = TraitDB.characters.find(c => c.id === creature.character);
                     const hobbyObj = TraitDB.hobbies.find(c => c.id === creature.hobby);
 
-                    // התאמת כפתורים ומרווחים למסכי מגע קטנים
                     card.innerHTML = `
                         <div class="creature-svg-wrapper mb-3 flex justify-center items-center h-24 sm:h-32 w-full bg-slate-900/50 rounded-xl border border-slate-700 shadow-inner">
                             ${svgMarkup}
@@ -556,11 +558,6 @@
                 const valName = this.els.valSelect.options[this.els.valSelect.selectedIndex].text;
                 
                 this.processQuestion(category, value, catName, valName);
-
-                if (this.isComboMode) {
-                    this.isComboMode = false;
-                    this.updateButtonsState();
-                }
             },
 
             processQuestion(category, value, catName, valName) {
@@ -627,20 +624,6 @@
                 this.els.historyList.prepend(li);
             },
 
-            buyCombo() {
-                if (this.coins < 1 || this.isComboMode) return;
-                AudioEngine.playMagic();
-                
-                this.coins--;
-                this.isComboMode = true;
-                this.renderCoins();
-                
-                const li = document.createElement('li');
-                li.className = 'p-2 rounded-lg border-r-4 shadow-sm bg-purple-900/30 border-purple-500 text-purple-100 text-xs font-bold text-center';
-                li.innerText = '⚡ מצב קומבו הופעל! שאל בחינם.';
-                this.els.historyList.prepend(li);
-            },
-
             toggleEliminate(id) {
                 AudioEngine.playEliminate();
                 const creature = this.creatures.find(c => c.id === id);
@@ -668,6 +651,16 @@
                 document.getElementById('modal-message').innerText = message;
                 document.getElementById('modal-content').className = `bg-slate-800 p-6 rounded-3xl border-2 max-w-sm w-full text-center shadow-2xl ${borderColorClass}`;
                 document.getElementById('modal').classList.remove('hidden');
+            },
+
+            showHelp() {
+                AudioEngine.playClick();
+                this.els.helpModal.classList.remove('hidden');
+            },
+
+            closeHelp() {
+                AudioEngine.playClick();
+                this.els.helpModal.classList.add('hidden');
             }
         };
 
