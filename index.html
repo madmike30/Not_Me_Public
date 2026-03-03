@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <!-- הגדרות Viewport מחמירות למובייל ולמניעת זום -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- הגדרות PWA לאייפון (שמירה למסך הבית) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="היצור הסודי">
+    
+    <title>היצור הסודי</title>
+    
+    <!-- טעינת ספריות חיצוניות -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* מניעת תופעות הלוואי של גלישה ומגע באייפון */
+        body { 
+            font-family: 'Heebo', sans-serif; 
+            overscroll-behavior-y: none; /* מונע Pull-to-refresh */
+            -webkit-user-select: none; /* מניעת בחירת טקסט בספארי */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent; /* הסרת הריבוע האפור בלחיצה על כפתורים באייפון */
+            touch-action: manipulation; /* ביטול השהיית זום בלחיצה כפולה */
+        }
+        
+        .eliminated {
+            filter: grayscale(100%) opacity(0.3);
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+        
+        .creature-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        /* עיצוב פס גלילה מותאם אישית (אם כי ב-iOS זה כמעט לא נראה) */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        
+        /* אינטראקציית ריחוף למשתמש (פעיל בעיקר בדסקטופ, אך לא מפריע במובייל) */
+        @media (hover: hover) {
+            .creature-svg-wrapper:hover svg {
+                transform: translateY(-8px) scale(1.08) !important;
+                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+                cursor: pointer;
+            }
+        }
+        
+        /* אנימציות חיים מבוססות חומרה (GPU) לביצועים אופטימליים במובייל */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+            will-change: transform; /* רמז לדפדפן להשתמש בהאצת חומרה */
+        }
+
+        @keyframes shadow-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(0.85); opacity: 0.15; }
+        }
+        .animate-shadow {
+            transform-origin: center;
+            animation: shadow-pulse 4s ease-in-out infinite;
+            will-change: transform, opacity;
+        }
+
+        @keyframes blink {
+            0%, 96%, 98%, 100% { transform: scaleY(1); }
+            97% { transform: scaleY(0.1); }
+        }
+        .animate-blink {
+            animation: blink 5s infinite;
+        }
+        
+        /* משוב ויזואלי מהיר ללחיצות מסך מגע */
+        button:active {
+            transform: scale(0.95);
+            transition: transform 0.1s;
+        }
+
+        /* גלילה חלקה פנימית ל-iOS */
+        .scrolling-container {
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col p-4 pb-safe overflow-x-hidden">
+
+    <!-- כותרת מותאמת למסכים קטנים -->
+    <header class="w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center bg-slate-800 p-4 rounded-2xl shadow-xl mb-4 border border-slate-700">
+        <div class="mb-3 md:mb-0 text-center md:text-right">
+            <h1 class="text-3xl font-black text-indigo-400 tracking-tight">👾 היצור הסודי</h1>
+            <p class="text-slate-400 mt-1 text-sm hidden sm:block">מנוע מולטימדיה ואנימציות חיים. מצא את היצור הנכון.</p>
+        </div>
+        <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-inner w-full md:w-auto justify-center">
+            <span class="text-slate-300 font-bold text-sm">מטבעות:</span>
+            <div id="coins-container" class="flex gap-1 text-xl"></div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 flex-1">
+        
+        <!-- פאנל ניהול פעולות (מסודר אנכית למובייל) -->
+        <aside class="w-full lg:w-1/3 flex flex-col gap-4 order-2 lg:order-1">
+            
+            <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700">
+                <h2 class="text-xl font-bold text-white mb-3 border-b border-slate-600 pb-2">מסוף חקירה</h2>
+                <div class="flex flex-col gap-3 mb-4">
+                    <label class="text-sm font-bold text-slate-400">בחר קטגוריה:</label>
+                    <select id="trait-category" class="bg-slate-900 border border-slate-600 text-white rounded-lg p-3 w-full outline-none focus:border-indigo-500 transition-colors text-base appearance-none"></select>
+                    
+                    <label class="text-sm font-bold text-slate-400 mt-1">בחר מאפיין:</label>
+                    <select id="trait-value" class="bg-slate-900 border border-slate-600 text-white rounded-lg p-3 w-full outline-none focus:border-indigo-500 transition-colors text-base appearance-none"></select>
+                </div>
+                <button id="btn-ask" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-6 rounded-lg transition-colors shadow-lg flex items-center justify-center gap-2 text-lg touch-manipulation">
+                    <span>❓</span> שאל שאלה
+                </button>
+            </div>
+
+            <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700">
+                <h2 class="text-lg font-bold text-yellow-400 mb-3 border-b border-slate-600 pb-2">פעולות מיוחדות</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                    <button onclick="GameLogic.buyHint()" id="btn-hint" class="bg-slate-700 hover:bg-slate-600 border border-yellow-500/30 text-white py-3 px-3 rounded-lg text-xs sm:text-sm font-bold transition-colors flex flex-col sm:flex-row justify-between items-center gap-2 touch-manipulation">
+                        <span>💡 רמז סודי</span>
+                        <span class="bg-yellow-500 text-slate-900 px-2 py-1 rounded text-[10px] font-black w-full sm:w-auto text-center">עלות: 1 🪙</span>
+                    </button>
+                    <button onclick="GameLogic.buyCombo()" id="btn-combo" class="bg-slate-700 hover:bg-slate-600 border border-purple-500/30 text-white py-3 px-3 rounded-lg text-xs sm:text-sm font-bold transition-colors flex flex-col sm:flex-row justify-between items-center gap-2 touch-manipulation">
+                        <span>⚡ שאלת קומבו</span>
+                        <span class="bg-purple-400 text-slate-900 px-2 py-1 rounded text-[10px] font-black w-full sm:w-auto text-center">עלות: 1 🪙</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-2xl shadow-xl border border-slate-700 h-48 lg:h-auto lg:flex-1 flex flex-col">
+                <h2 class="text-lg font-bold text-white mb-2 border-b border-slate-600 pb-2">היסטוריה</h2>
+                <ul id="history-list" class="space-y-2 overflow-y-auto scrolling-container flex-1 pr-1">
+                    <li class="text-slate-500 italic text-sm" id="no-history-msg">טרם נשאלו שאלות.</li>
+                </ul>
+            </div>
+
+        </aside>
+
+        <!-- רשת הדמויות (מופיעה ראשונה במובייל) -->
+        <section class="w-full lg:w-2/3 order-1 lg:order-2">
+            <!-- מותאם ל-2 עמודות במסך אייפון סטנדרטי -->
+            <div id="creatures-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+        </section>
+
+    </main>
+
+    <!-- מודל ניצחון/הפסד המכסה את כל המסך במובייל -->
+    <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-50 transition-opacity backdrop-blur-md p-4">
+        <div class="bg-slate-800 p-6 rounded-3xl border-2 max-w-sm w-full text-center shadow-2xl" id="modal-content">
+            <h2 id="modal-title" class="text-3xl font-black mb-3"></h2>
+            <p id="modal-message" class="text-lg text-slate-300 mb-6 leading-tight"></p>
+            <button onclick="GameLogic.init()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl text-xl transition-transform transform hover:scale-105 shadow-lg w-full touch-manipulation">
+                התחל משחק חדש
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * מנוע אודיו מבוסס Web Audio API
+         * מותאם לתקנות השתקת קול (Auto-play policy) של ספארי ב-iOS.
+         */
+        const AudioEngine = {
+            ctx: null,
+            
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+
+            playTone(freq, type, duration, vol = 0.1) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                
+                gain.gain.setValueAtTime(0, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+
+            playClick() { this.playTone(600, 'sine', 0.1, 0.05); },
+            playEliminate() { this.playTone(300, 'triangle', 0.15, 0.05); },
+            
+            playSuccess() {
+                this.playTone(523.25, 'sine', 0.15, 0.1); 
+                setTimeout(() => this.playTone(659.25, 'sine', 0.2, 0.1), 100); 
+            },
+            
+            playError() {
+                this.playTone(300, 'sawtooth', 0.2, 0.08);
+                setTimeout(() => this.playTone(250, 'sawtooth', 0.3, 0.08), 150);
+            },
+            
+            playMagic() {
+                [440, 554, 659, 880].forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'sine', 0.4, 0.05), i * 60);
+                });
+            },
+
+            playWin() {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'square', 0.4, 0.05), i * 100);
+                });
+            },
+
+            playLose() {
+                [440, 415, 392, 349].forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'sawtooth', 0.5, 0.08), i * 200);
+                });
+            }
+        };
+
+        // הזרקת אירוע מגע (touchstart) הנדרש לפתיחת צינור השמע במכשירי אפל
+        document.body.addEventListener('touchstart', () => AudioEngine.init(), { once: true });
+        document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
+
+        /**
+         * מסד נתונים מזוקק
+         */
+        const TraitDB = {
+            colors: [
+                { id: 'red', name: 'אדום', hex: '#ef4444', dark: '#b91c1c' },
+                { id: 'blue', name: 'כחול', hex: '#3b82f6', dark: '#1d4ed8' },
+                { id: 'green', name: 'ירוק', hex: '#22c55e', dark: '#15803d' },
+                { id: 'purple', name: 'סגול', hex: '#a855f7', dark: '#7e22ce' }
+            ],
+            bodies: [
+                { id: 'chubby', name: 'שמנמן' },
+                { id: 'boxy', name: 'קופסתי' }
+            ],
+            eyes: [
+                { id: '1', name: 'עין אחת' },
+                { id: '2', name: 'שתי עיניים' }
+            ],
+            accessories: [
+                { id: 'glasses', name: 'משקפיים' },
+                { id: 'bowtie', name: 'פפיון' },
+                { id: 'sprout', name: 'נבט בראש' },
+                { id: 'none', name: 'ללא תוספות' }
+            ],
+            characters: [
+                { id: 'brave', name: 'אמיץ', icon: '🦁' },
+                { id: 'shy', name: 'ביישן', icon: '🫣' },
+                { id: 'funny', name: 'מצחיק', icon: '🤡' }
+            ],
+            hobbies: [
+                { id: 'food', name: 'אוהב לאכול', icon: '🍔' },
+                { id: 'sleep', name: 'אוהב לישון', icon: '💤' },
+                { id: 'play', name: 'אוהב לשחק', icon: '🎮' }
+            ]
+        };
+
+        const CategoryMap = {
+            color: { name: 'צבע', db: TraitDB.colors },
+            body: { name: 'מבנה גוף', db: TraitDB.bodies },
+            eyes: { name: 'מספר עיניים', db: TraitDB.eyes },
+            accessory: { name: 'תוספות', db: TraitDB.accessories },
+            character: { name: 'אופי', db: TraitDB.characters },
+            hobby: { name: 'תחביב', db: TraitDB.hobbies }
+        };
+
+        /**
+         * מנוע וקטורי מונפש
+         */
+        const SVGCreator = {
+            generate(creature) {
+                const colorObj = TraitDB.colors.find(c => c.id === creature.color);
+                const isChubby = creature.body === 'chubby';
+                const isOneEye = creature.eyes === '1';
+                const acc = creature.accessory;
+                
+                const gradId = `grad_${creature.id}_${creature.color}`;
+                const floatDelay = (Math.random() * -4).toFixed(2);
+                const blinkDelay = (Math.random() * -5).toFixed(2);
+
+                // הוספת pointer-events-none פותרת בעיות לחיצה ב-iOS
+                let svg = `<svg viewBox="0 0 100 100" class="w-20 h-20 sm:w-28 sm:h-28 drop-shadow-xl animate-float pointer-events-none" style="animation-delay: ${floatDelay}s" xmlns="http://www.w3.org/2000/svg">`;
+                
+                svg += `
+                    <defs>
+                        <radialGradient id="${gradId}" cx="30%" cy="30%" r="70%">
+                            <stop offset="0%" stop-color="${colorObj.hex}" stop-opacity="1" />
+                            <stop offset="100%" stop-color="${colorObj.dark}" stop-opacity="1" />
+                        </radialGradient>
+                    </defs>
+                `;
+                
+                svg += `<ellipse cx="50" cy="90" rx="30" ry="6" fill="rgba(0,0,0,0.3)" class="animate-shadow" style="animation-delay: ${floatDelay}s" />`;
+                svg += `<path d="M 35 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
+                svg += `<path d="M 55 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
+                svg += `<path d="M 20 60 Q 5 60 15 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                svg += `<path d="M 80 60 Q 95 60 85 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
+
+                if (isChubby) {
+                    svg += `<ellipse cx="50" cy="55" rx="35" ry="32" fill="url(#${gradId})" />`;
+                } else {
+                    svg += `<rect x="20" y="25" width="60" height="60" rx="15" fill="url(#${gradId})" />`;
+                }
+
+                const blushY = 60;
+                if (isOneEye) {
+                    svg += `<ellipse cx="25" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    svg += `<ellipse cx="75" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                } else {
+                    svg += `<ellipse cx="20" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    svg += `<ellipse cx="80" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                }
+
+                svg += `<path d="M 45 70 Q 50 75 55 70" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
+
+                const eyeY = 48;
+                if (isOneEye) {
+                    svg += `
+                    <g class="animate-blink" style="transform-origin: 50px ${eyeY}px; animation-delay: ${blinkDelay}s">
+                        <circle cx="50" cy="${eyeY}" r="14" fill="white" stroke="#0f172a" stroke-width="2"/>
+                        <circle cx="50" cy="${eyeY}" r="6" fill="#0f172a"/>
+                        <circle cx="48" cy="${eyeY - 2}" r="2" fill="white"/>
+                    </g>`;
+                } else {
+                    svg += `
+                    <g class="animate-blink" style="transform-origin: 32px ${eyeY}px; animation-delay: ${blinkDelay}s">
+                        <circle cx="32" cy="${eyeY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/>
+                        <circle cx="32" cy="${eyeY}" r="4" fill="#0f172a"/>
+                        <circle cx="31" cy="${eyeY - 1}" r="1.5" fill="white"/>
+                    </g>
+                    <g class="animate-blink" style="transform-origin: 68px ${eyeY}px; animation-delay: ${blinkDelay}s">
+                        <circle cx="68" cy="${eyeY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/>
+                        <circle cx="68" cy="${eyeY}" r="4" fill="#0f172a"/>
+                        <circle cx="67" cy="${eyeY - 1}" r="1.5" fill="white"/>
+                    </g>`;
+                }
+
+                if (acc === 'glasses') {
+                    if (isOneEye) {
+                        svg += `<circle cx="50" cy="${eyeY}" r="18" fill="none" stroke="#1e293b" stroke-width="4"/>`;
+                        svg += `<line x1="15" y1="${eyeY}" x2="32" y2="${eyeY}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>`;
+                        svg += `<line x1="68" y1="${eyeY}" x2="85" y2="${eyeY}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>`;
+                    } else {
+                        svg += `<circle cx="32" cy="${eyeY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/>`;
+                        svg += `<circle cx="68" cy="${eyeY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/>`;
+                        svg += `<line x1="46" y1="${eyeY}" x2="54" y2="${eyeY}" stroke="#1e293b" stroke-width="3"/>`;
+                    }
+                } else if (acc === 'bowtie') {
+                    const btY = isChubby ? 82 : 80;
+                    svg += `<polygon points="50,${btY} 40,${btY - 5} 40,${btY + 5}" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>`;
+                    svg += `<polygon points="50,${btY} 60,${btY - 5} 60,${btY + 5}" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>`;
+                    svg += `<circle cx="50" cy="${btY}" r="3" fill="#fca5a5" stroke="#7f1d1d" stroke-width="1"/>`;
+                } else if (acc === 'sprout') {
+                    const topY = isChubby ? 23 : 25;
+                    svg += `<path d="M 50 ${topY} Q 45 ${topY - 10} 55 ${topY - 15}" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round"/>`;
+                    svg += `<path d="M 55 ${topY - 15} Q 60 ${topY - 10} 50 ${topY - 5} Z" fill="#22c55e" stroke="#15803d" stroke-width="1"/>`;
+                    svg += `<path d="M 50 ${topY - 5} Q 40 ${topY - 10} 45 ${topY - 15} Z" fill="#4ade80" stroke="#15803d" stroke-width="1"/>`;
+                }
+
+                svg += `</svg>`;
+                return svg;
+            }
+        };
+
+        /**
+         * לוגיקת המשחק
+         */
+        const GameLogic = {
+            creatures: [],
+            secretCreatureId: null,
+            coins: 2,
+            isComboMode: false,
+            
+            els: {
+                grid: document.getElementById('creatures-grid'),
+                catSelect: document.getElementById('trait-category'),
+                valSelect: document.getElementById('trait-value'),
+                btnAsk: document.getElementById('btn-ask'),
+                historyList: document.getElementById('history-list'),
+                noHistoryMsg: document.getElementById('no-history-msg'),
+                coinsContainer: document.getElementById('coins-container'),
+                btnHint: document.getElementById('btn-hint'),
+                btnCombo: document.getElementById('btn-combo')
+            },
+
+            init() {
+                this.coins = 2;
+                this.isComboMode = false;
+                this.generateCreatures(10); // ירד ל-10 עקב צפיפות במסך מובייל
+                
+                const randomIndex = Math.floor(Math.random() * this.creatures.length);
+                this.secretCreatureId = this.creatures[randomIndex].id;
+                
+                this.resetUI();
+                this.renderCoins();
+                this.renderGrid();
+                this.populateDropdowns();
+            },
+
+            getRandomTrait(array) {
+                return array[Math.floor(Math.random() * array.length)].id;
+            },
+
+            generateCreatures(count) {
+                this.creatures = [];
+                for (let i = 0; i < count; i++) {
+                    const creature = {
+                        id: i + 1,
+                        name: `יצור #${i + 1}`,
+                        color: this.getRandomTrait(TraitDB.colors),
+                        body: this.getRandomTrait(TraitDB.bodies),
+                        eyes: this.getRandomTrait(TraitDB.eyes),
+                        accessory: this.getRandomTrait(TraitDB.accessories),
+                        character: this.getRandomTrait(TraitDB.characters),
+                        hobby: this.getRandomTrait(TraitDB.hobbies),
+                        eliminated: false
+                    };
+                    this.creatures.push(creature);
+                }
+            },
+
+            resetUI() {
+                document.getElementById('modal').classList.add('hidden');
+                this.els.historyList.innerHTML = '';
+                this.els.historyList.appendChild(this.els.noHistoryMsg);
+                this.els.noHistoryMsg.style.display = 'block';
+                this.updateButtonsState();
+            },
+
+            renderCoins() {
+                this.els.coinsContainer.innerHTML = '';
+                for (let i = 0; i < this.coins; i++) {
+                    this.els.coinsContainer.innerHTML += `<span class="drop-shadow-md">🪙</span>`;
+                }
+                if (this.coins === 0) {
+                    this.els.coinsContainer.innerHTML = `<span class="text-slate-600 text-sm">אין מטבעות</span>`;
+                }
+                this.updateButtonsState();
+            },
+
+            updateButtonsState() {
+                const canBuy = this.coins > 0;
+                this.els.btnHint.disabled = !canBuy;
+                this.els.btnCombo.disabled = !canBuy || this.isComboMode;
+                
+                [this.els.btnHint, this.els.btnCombo].forEach(btn => {
+                    if (btn.disabled) {
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                });
+
+                if (this.isComboMode) {
+                    this.els.btnAsk.innerHTML = `<span>⚡</span> קומבו`;
+                    this.els.btnAsk.classList.replace('bg-indigo-600', 'bg-purple-600');
+                    this.els.btnAsk.classList.replace('hover:bg-indigo-500', 'hover:bg-purple-500');
+                } else {
+                    this.els.btnAsk.innerHTML = `<span>❓</span> שאל שאלה`;
+                    this.els.btnAsk.classList.replace('bg-purple-600', 'bg-indigo-600');
+                    this.els.btnAsk.classList.replace('hover:bg-purple-500', 'hover:bg-indigo-500');
+                }
+            },
+
+            populateDropdowns() {
+                this.els.catSelect.innerHTML = '';
+                Object.keys(CategoryMap).forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = CategoryMap[key].name;
+                    this.els.catSelect.appendChild(option);
+                });
+
+                this.els.catSelect.addEventListener('change', () => {
+                    AudioEngine.playClick();
+                    this.updateValueDropdown();
+                });
+                this.updateValueDropdown();
+            },
+
+            updateValueDropdown() {
+                const selectedCat = this.els.catSelect.value;
+                const db = CategoryMap[selectedCat].db;
+                
+                this.els.valSelect.innerHTML = '';
+                db.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name + (item.icon ? ` ${item.icon}` : '');
+                    this.els.valSelect.appendChild(option);
+                });
+            },
+
+            renderGrid() {
+                this.els.grid.innerHTML = '';
+                
+                this.creatures.forEach(creature => {
+                    const card = document.createElement('div');
+                    card.className = `creature-card bg-slate-800 border border-slate-700 rounded-xl p-3 flex flex-col items-center shadow-lg ${creature.eliminated ? 'eliminated' : 'hover:border-indigo-500 hover:shadow-indigo-500/20'}`;
+                    
+                    const svgMarkup = SVGCreator.generate(creature);
+                    
+                    const charObj = TraitDB.characters.find(c => c.id === creature.character);
+                    const hobbyObj = TraitDB.hobbies.find(c => c.id === creature.hobby);
+
+                    // התאמת כפתורים ומרווחים למסכי מגע קטנים
+                    card.innerHTML = `
+                        <div class="creature-svg-wrapper mb-3 flex justify-center items-center h-24 sm:h-32 w-full bg-slate-900/50 rounded-xl border border-slate-700 shadow-inner">
+                            ${svgMarkup}
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-1 w-full justify-center mb-3">
+                            <span class="bg-slate-700 rounded-md py-1 px-2 text-sm flex items-center gap-1 shadow-sm" title="אופי: ${charObj.name}">${charObj.icon} <span class="text-[10px] font-bold text-slate-300">${charObj.name}</span></span>
+                            <span class="bg-slate-700 rounded-md py-1 px-2 text-sm flex items-center gap-1 shadow-sm" title="תחביב: ${hobbyObj.name}">${hobbyObj.icon} <span class="text-[10px] font-bold text-slate-300">${hobbyObj.name}</span></span>
+                        </div>
+
+                        <div class="flex gap-1 w-full mt-auto">
+                            <button onclick="GameLogic.toggleEliminate(${creature.id})" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg font-medium transition-colors text-xs border border-slate-600 touch-manipulation">
+                                ${creature.eliminated ? 'החזר' : 'פסול'}
+                            </button>
+                            <button onclick="GameLogic.accuse(${creature.id})" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg font-bold transition-colors text-xs shadow-md touch-manipulation" ${creature.eliminated ? 'disabled' : ''}>
+                                זה הוא!
+                            </button>
+                        </div>
+                    `;
+                    
+                    this.els.grid.appendChild(card);
+                });
+            },
+
+            askQuestion() {
+                AudioEngine.playClick();
+                const category = this.els.catSelect.value;
+                const value = this.els.valSelect.value;
+                
+                const catName = CategoryMap[category].name;
+                const valName = this.els.valSelect.options[this.els.valSelect.selectedIndex].text;
+                
+                this.processQuestion(category, value, catName, valName);
+
+                if (this.isComboMode) {
+                    this.isComboMode = false;
+                    this.updateButtonsState();
+                }
+            },
+
+            processQuestion(category, value, catName, valName) {
+                const secret = this.creatures.find(c => c.id === this.secretCreatureId);
+                const isTrue = secret[category] === value;
+
+                if (isTrue) {
+                    AudioEngine.playSuccess();
+                } else {
+                    AudioEngine.playError();
+                }
+
+                this.logHistory(`האם ה${catName} הוא ${valName}?`, isTrue);
+            },
+
+            logHistory(questionText, isTrue) {
+                this.els.noHistoryMsg.style.display = 'none';
+                
+                const li = document.createElement('li');
+                li.className = `p-2 rounded-lg border-r-4 shadow-sm flex items-start gap-2 ${isTrue ? 'bg-green-900/30 border-green-500 text-green-100' : 'bg-red-900/30 border-red-500 text-red-100'}`;
+                
+                const icon = isTrue ? '✅' : '❌';
+                const answerText = isTrue ? 'כן' : 'לא';
+
+                li.innerHTML = `
+                    <span class="text-base mt-0.5">${icon}</span>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-xs text-slate-300">${questionText}</span>
+                        <span class="font-black text-sm">${answerText}</span>
+                    </div>
+                `;
+                
+                this.els.historyList.prepend(li);
+            },
+
+            buyHint() {
+                if (this.coins < 1) return;
+                AudioEngine.playMagic();
+                
+                this.coins--;
+                this.renderCoins();
+
+                const secret = this.creatures.find(c => c.id === this.secretCreatureId);
+                
+                const hintCategories = Object.keys(CategoryMap);
+                const randomCat = hintCategories[Math.floor(Math.random() * hintCategories.length)];
+                const traitValue = secret[randomCat];
+                
+                const catName = CategoryMap[randomCat].name;
+                const valObj = CategoryMap[randomCat].db.find(item => item.id === traitValue);
+                const valName = valObj.name + (valObj.icon ? ` ${valObj.icon}` : '');
+
+                this.els.noHistoryMsg.style.display = 'none';
+                const li = document.createElement('li');
+                li.className = 'p-2 rounded-lg border-r-4 shadow-sm bg-yellow-900/30 border-yellow-500 text-yellow-100 flex items-start gap-2';
+                
+                li.innerHTML = `
+                    <span class="text-base mt-0.5">💡</span>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-xs text-yellow-500">רמז שהתגלה:</span>
+                        <span class="font-black text-sm">ה${catName} הוא ${valName}</span>
+                    </div>
+                `;
+                this.els.historyList.prepend(li);
+            },
+
+            buyCombo() {
+                if (this.coins < 1 || this.isComboMode) return;
+                AudioEngine.playMagic();
+                
+                this.coins--;
+                this.isComboMode = true;
+                this.renderCoins();
+                
+                const li = document.createElement('li');
+                li.className = 'p-2 rounded-lg border-r-4 shadow-sm bg-purple-900/30 border-purple-500 text-purple-100 text-xs font-bold text-center';
+                li.innerText = '⚡ מצב קומבו הופעל! שאל בחינם.';
+                this.els.historyList.prepend(li);
+            },
+
+            toggleEliminate(id) {
+                AudioEngine.playEliminate();
+                const creature = this.creatures.find(c => c.id === id);
+                if (creature) {
+                    creature.eliminated = !creature.eliminated;
+                    this.renderGrid();
+                }
+            },
+
+            accuse(id) {
+                const creature = this.creatures.find(c => c.id === id);
+                if (id === this.secretCreatureId) {
+                    AudioEngine.playWin();
+                    this.showModal('ניצחון! 🏆', `אכן, ${creature.name} הוא היצור הסודי.`, 'border-green-500', 'text-green-500');
+                } else {
+                    AudioEngine.playLose();
+                    const secretCr = this.creatures.find(c => c.id === this.secretCreatureId);
+                    this.showModal('טעות מרה! ❌', `היצור האמיתי היה ${secretCr.name}.`, 'border-red-500', 'text-red-500');
+                }
+            },
+
+            showModal(title, message, borderColorClass, titleColorClass) {
+                document.getElementById('modal-title').innerText = title;
+                document.getElementById('modal-title').className = `text-3xl font-black mb-3 ${titleColorClass}`;
+                document.getElementById('modal-message').innerText = message;
+                document.getElementById('modal-content').className = `bg-slate-800 p-6 rounded-3xl border-2 max-w-sm w-full text-center shadow-2xl ${borderColorClass}`;
+                document.getElementById('modal').classList.remove('hidden');
+            }
+        };
+
+        // אתחול אירועים בלחיצה
+        document.getElementById('btn-ask').addEventListener('click', () => GameLogic.askQuestion());
+        
+        window.addEventListener('DOMContentLoaded', () => GameLogic.init());
+
+    </script>
+</body>
+</html>
