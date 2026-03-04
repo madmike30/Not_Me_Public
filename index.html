@@ -1,182 +1,524 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
     <!-- הגדרות PWA לאייפון -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="היצור הסודי">
-    
+
     <title>היצור הסודי</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
-    
+
     <style>
-        body { 
-            font-family: 'Heebo', sans-serif; 
-            overscroll-behavior-y: none;
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748b;
+            --slate-400: #94a3b8;
+            --slate-300: #cbd5e1;
+            --slate-100: #f1f5f9;
+            --indigo-500: #6366f1;
+            --indigo-400: #818cf8;
+            --indigo-600: #4f46e5;
+            --red-500: #ef4444;
+            --green-500: #22c55e;
+            --green-600: #16a34a;
+            --green-900-30: rgba(20, 83, 45, 0.3);
+            --red-900-30: rgba(127, 29, 29, 0.3);
+            --yellow-500: #eab308;
+            --yellow-900-30: rgba(113, 63, 18, 0.3);
+            --purple-500: #a855f7;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--slate-900);
+            color: var(--slate-100);
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
-        
-        .eliminated {
-            filter: grayscale(100%) opacity(0.3);
-            transform: scale(0.95);
-            pointer-events: none;
+
+        /* === TOP BAR === */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--slate-800);
+            border-bottom: 1px solid var(--slate-700);
+            flex-shrink: 0;
+            z-index: 10;
         }
-        
-        .creature-card { 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
         }
-        
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        
-        @media (hover: hover) {
-            .creature-svg-wrapper:hover svg {
-                transform: translateY(-8px) scale(1.08) !important;
-                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-                cursor: pointer;
+
+        .game-title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--indigo-400);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .game-subtitle {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: var(--slate-400);
+            border-right: 1px solid var(--slate-600);
+            padding-right: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .help-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--indigo-600);
+            color: white;
+            border: 1px solid var(--indigo-400);
+            font-size: 1rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            margin-right: 10px;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--slate-500);
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--slate-100);
+        }
+
+        .coins-display {
+            display: flex;
+            gap: 3px;
+            font-size: 1.1rem;
+        }
+
+        /* === CREATURE GRID === */
+        .grid-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .onboarding-hint {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px dashed var(--indigo-500);
+            color: var(--indigo-300);
+            text-align: center;
+            padding: 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        .creature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 400px) {
+            .creature-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-        }
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
-            will-change: transform;
+
+        .mini-card {
+            background: var(--slate-800);
+            border: 2px solid var(--slate-700);
+            border-radius: 18px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            aspect-ratio: 0.85;
         }
 
-        @keyframes shadow-pulse {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(0.85); opacity: 0.15; }
-        }
-        .animate-shadow {
-            transform-origin: center;
-            animation: shadow-pulse 4s ease-in-out infinite;
-            will-change: transform, opacity;
+        /* מצב פסילה */
+        .mini-card.eliminated {
+            filter: grayscale(100%);
+            opacity: 0.4;
+            border-color: transparent;
+            transform: scale(0.96);
         }
 
-        @keyframes blink {
-            0%, 96%, 98%, 100% { transform: scaleY(1); }
-            97% { transform: scaleY(0.1); }
-        }
-        .animate-blink {
-            animation: blink 5s infinite;
-        }
-        
-        button:active {
-            transform: scale(0.95);
-            transition: transform 0.1s;
+        .mini-card.eliminated::after {
+            content: 'פסול';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            background: var(--red-500);
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 900;
+            padding: 4px 16px;
+            border-radius: 8px;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            pointer-events: none;
+            letter-spacing: 1px;
+            border: 2px solid white;
         }
 
-        .scrolling-container {
-            -webkit-overflow-scrolling: touch;
+        .mini-card.accuse-target {
+            border-color: var(--red-500);
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.5);
+            animation: target-pulse 0.8s infinite alternate;
         }
+
+        @keyframes target-pulse {
+            from { transform: scale(1); border-color: var(--red-500); }
+            to { transform: scale(1.03); border-color: white; }
+        }
+
+        .mini-svg-stage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mini-svg-stage svg {
+            width: 85%;
+            height: 85%;
+        }
+
+        /* === TOAST SYSTEM === */
+        .toast-container {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 90%;
+            max-width: 340px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--slate-800);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 2px solid var(--indigo-500);
+            margin-bottom: 10px;
+            animation: toast-in 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+
+        .toast.hide {
+            animation: toast-out 0.4s ease forwards;
+        }
+
+        @keyframes toast-in {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes toast-out {
+            to { transform: translateY(20px); opacity: 0; }
+        }
+
+        .toast-content {
+            flex: 1;
+            text-align: right;
+        }
+
+        .toast-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--slate-400);
+            display: block;
+        }
+
+        .toast-message {
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+        }
+
+        /* === HISTORY LOG === */
+        .log-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--slate-800);
+            border-top: 1px solid var(--slate-700);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .log-toggle-label {
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: var(--slate-300);
+        }
+
+        .question-log {
+            max-height: 0;
+            overflow: hidden;
+            background: var(--slate-900);
+            transition: max-height 0.3s ease;
+        }
+
+        .question-log.open {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--slate-800);
+            font-size: 0.8rem;
+        }
+
+        /* === BOTTOM ACTION BAR === */
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            padding: 12px 16px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            background: var(--slate-800);
+            border-top: 1px solid var(--slate-700);
+            flex-shrink: 0;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-height: 52px;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-ask { background: var(--indigo-600); color: white; }
+        .btn-hint { background: var(--slate-700); color: var(--yellow-500); border: 1px solid rgba(234,179,8,0.2); }
+        .btn-accuse { background: var(--slate-700); color: var(--red-500); border: 1px solid rgba(239,68,68,0.2); }
+        .btn-accuse.active { background: var(--red-500); color: white; }
+
+        /* === BOTTOM SHEET === */
+        .bottom-sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(4px);
+        }
+
+        .bottom-sheet-overlay.open { opacity: 1; pointer-events: all; }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--slate-800);
+            border-radius: 24px 24px 0 0;
+            z-index: 101;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
+            max-height: 70dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bottom-sheet.open { transform: translateY(0); }
+
+        .sheet-handle { width: 40px; height: 5px; background: var(--slate-600); border-radius: 3px; margin: 12px auto; }
+        .sheet-header { padding: 0 20px 15px; font-size: 1.1rem; font-weight: 900; color: var(--indigo-300); }
+        .sheet-body { padding: 16px; overflow-y: auto; flex: 1; }
+
+        .category-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch; }
+        .category-tab { padding: 10px 18px; border-radius: 12px; background: var(--slate-700); color: var(--slate-300); font-weight: 700; border: none; white-space: nowrap; font-family: 'Heebo', sans-serif; }
+        .category-tab.active { background: var(--indigo-600); color: white; }
+
+        .trait-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+        .trait-chip { padding: 14px 22px; border-radius: 14px; background: var(--slate-700); color: var(--slate-100); font-weight: 900; border: 2px solid var(--slate-600); font-family: 'Heebo', sans-serif; }
+        .trait-chip.asked { opacity: 0.3; pointer-events: none; }
+
+        .sheet-footer { padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: 1px solid var(--slate-700); }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--slate-800); padding: 30px; border-radius: 28px; border: 2px solid var(--slate-700); width: 100%; max-width: 360px; text-align: center; }
+        .modal-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 15px; }
+        .modal-btn { width: 100%; min-height: 56px; border: none; border-radius: 18px; background: var(--indigo-600); color: white; font-weight: 900; font-size: 1.2rem; }
+
+        /* ANIMATIONS */
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        @keyframes blink { 0%, 96%, 98%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+        .animate-blink { animation: blink 5s infinite; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col p-4 pb-safe overflow-x-hidden">
 
-    <!-- כותרת ראשית כולל כפתור עזרה -->
-    <header class="w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center bg-slate-800 p-4 rounded-2xl shadow-xl mb-4 border border-slate-700">
-        <div class="mb-3 md:mb-0 text-center md:text-right flex items-center gap-3">
-            <button onclick="GameLogic.showHelp()" class="bg-indigo-600 hover:bg-indigo-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl shadow-lg transition-colors border border-indigo-400 touch-manipulation" title="איך משחקים?">
-                ?
-            </button>
-            <div>
-                <h1 class="text-3xl font-black text-indigo-400 tracking-tight">👾 היצור הסודי</h1>
-                <p class="text-slate-400 mt-1 text-sm hidden sm:block">גלו מי הוא היצור הסודי לפני שייגמרו לכם המטבעות.</p>
+<body>
+    <!-- TOAST NOTIFICATIONS -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="top-bar-right">
+            <button class="help-btn" onclick="GameLogic.showHelp()">?</button>
+            <div class="game-title">
+                <span>👾 היצור הסודי</span>
+                <span class="game-subtitle">מתחבא. תמצאו אותו!</span>
             </div>
         </div>
-        <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-inner w-full md:w-auto justify-center">
-            <span class="text-slate-300 font-bold text-sm">מטבעות:</span>
-            <div id="coins-container" class="flex gap-1 text-xl"></div>
-        </div>
-    </header>
-
-    <main class="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 flex-1">
-        
-        <!-- פאנל ניהול פעולות -->
-        <aside class="w-full lg:w-1/3 flex flex-col gap-4 order-2 lg:order-1">
-            
-            <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700">
-                <h2 class="text-xl font-bold text-white mb-3 border-b border-slate-600 pb-2">מסוף חקירה</h2>
-                <div class="flex flex-col gap-3 mb-4">
-                    <label class="text-sm font-bold text-slate-400">בחר קטגוריה:</label>
-                    <select id="trait-category" class="bg-slate-900 border border-slate-600 text-white rounded-lg p-3 w-full outline-none focus:border-indigo-500 transition-colors text-base appearance-none"></select>
-                    
-                    <label class="text-sm font-bold text-slate-400 mt-1">בחר מאפיין:</label>
-                    <select id="trait-value" class="bg-slate-900 border border-slate-600 text-white rounded-lg p-3 w-full outline-none focus:border-indigo-500 transition-colors text-base appearance-none"></select>
-                </div>
-                <button id="btn-ask" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-6 rounded-lg transition-colors shadow-lg flex items-center justify-center gap-2 text-lg touch-manipulation">
-                    <span>❓</span> שאל שאלה
-                </button>
-            </div>
-
-            <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700">
-                <h2 class="text-lg font-bold text-yellow-400 mb-3 border-b border-slate-600 pb-2">פעולות מיוחדות</h2>
-                <div class="grid grid-cols-1 gap-3">
-                    <button onclick="GameLogic.buyHint()" id="btn-hint" class="bg-slate-700 hover:bg-slate-600 border border-yellow-500/30 text-white py-3 px-3 rounded-lg text-xs sm:text-sm font-bold transition-colors flex flex-col sm:flex-row justify-between items-center gap-2 touch-manipulation">
-                        <span>💡 רמז סודי</span>
-                        <span class="bg-yellow-500 text-slate-900 px-2 py-1 rounded text-[10px] font-black w-full sm:w-auto text-center">עלות: 1 🪙</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-slate-800 p-4 rounded-2xl shadow-xl border border-slate-700 h-48 lg:h-auto lg:flex-1 flex flex-col">
-                <h2 class="text-lg font-bold text-white mb-2 border-b border-slate-600 pb-2">היסטוריה</h2>
-                <ul id="history-list" class="space-y-2 overflow-y-auto scrolling-container flex-1 pr-1">
-                    <li class="text-slate-500 italic text-sm" id="no-history-msg">טרם נשאלו שאלות.</li>
-                </ul>
-            </div>
-
-        </aside>
-
-        <!-- רשת הדמויות -->
-        <section class="w-full lg:w-2/3 order-1 lg:order-2">
-            <div id="creatures-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3"></div>
-        </section>
-
-    </main>
-
-    <!-- מודל ניצחון/הפסד -->
-    <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-50 transition-opacity backdrop-blur-md p-4">
-        <div class="bg-slate-800 p-6 rounded-3xl border-2 max-w-sm w-full text-center shadow-2xl" id="modal-content">
-            <h2 id="modal-title" class="text-3xl font-black mb-3"></h2>
-            <p id="modal-message" class="text-lg text-slate-300 mb-6 leading-tight"></p>
-            <button onclick="GameLogic.init()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl text-xl transition-transform transform hover:scale-105 shadow-lg w-full touch-manipulation">
-                התחל משחק חדש
-            </button>
+        <div class="stat-item">
+            <span class="stat-label">מטבעות</span>
+            <div class="coins-display" id="coins-container"></div>
         </div>
     </div>
 
-    <!-- מודל חוקי המשחק (עזרה) -->
-    <div id="help-modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-50 transition-opacity backdrop-blur-md p-4">
-        <div class="bg-slate-800 p-6 rounded-3xl border-2 border-indigo-500 max-w-md w-full text-right shadow-2xl relative">
-            <button onclick="GameLogic.closeHelp()" class="absolute top-4 left-4 text-slate-400 hover:text-white text-3xl font-bold leading-none touch-manipulation">&times;</button>
-            <h2 class="text-2xl font-black mb-4 text-indigo-400 border-b border-slate-700 pb-2 flex items-center gap-2">
-                <span>📜</span> איך משחקים?
-            </h2>
-            <div class="space-y-4 text-slate-300 text-sm md:text-base leading-relaxed">
-                <p><strong class="text-white">המטרה:</strong> גלו מי הוא היצור הסודי מבין כל היצורים על המסך.</p>
-                <ul class="list-disc list-inside space-y-2">
-                    <li><strong class="text-white">שאלו שאלות:</strong> בחרו קטגוריה ומאפיין (למשל: האם הצבע אדום?) כדי לסנן חשודים. לא ניתן לשאול את אותה שאלה פעמיים.</li>
-                    <li><strong class="text-white">פסלו דמויות:</strong> השתמשו בכפתור "פסול" מתחת לכל יצור כדי להחשיך אותו אם הוא לא מתאים.</li>
-                    <li><strong class="text-white">מטבעות זהב:</strong> נצלו אותם לרכישת רמזים סודיים שיעזרו לכם להתמקד בחיפוש.</li>
-                    <li><strong class="text-white">האשמה:</strong> בטוחים שמצאתם? לחצו על "זה הוא!". טעות אחת והמשחק נגמר באופן מיידי.</li>
+    <!-- CREATURE GRID -->
+    <div class="grid-area">
+        <div class="onboarding-hint" id="onboardingHint">
+            💡 טיפ: גע ביצור כדי לפסול אותו מהרשימה
+        </div>
+        <div class="creature-grid" id="creatures-grid"></div>
+    </div>
+
+    <!-- HISTORY LOG -->
+    <div class="log-toggle" onclick="toggleLog()">
+        <span class="log-toggle-label" id="log-label">היסטוריה (0)</span>
+        <span id="logArrow">▲</span>
+    </div>
+    <div class="question-log" id="questionLog"></div>
+
+    <!-- BOTTOM ACTION BAR -->
+    <div class="action-bar">
+        <button class="action-btn btn-ask" onclick="openSheet()">❓ שאל שאלה</button>
+        <button class="action-btn btn-hint" id="btn-hint" onclick="GameLogic.buyHint()">💡 רמז</button>
+        <button class="action-btn btn-accuse" id="btn-accuse" onclick="GameLogic.toggleAccuseMode()">🎯 ניחוש</button>
+    </div>
+
+    <!-- QUESTION BOTTOM SHEET -->
+    <div class="bottom-sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+    <div class="bottom-sheet" id="questionSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">שאל על היצור הסודי</div>
+        <div class="sheet-body">
+            <div class="category-tabs" id="category-tabs"></div>
+            <div class="trait-chips" id="trait-chips"></div>
+        </div>
+        <div class="sheet-footer">
+            <p style="text-align: center; color: var(--slate-400); font-size: 0.85rem;">בחר מאפיין כדי לקבל תשובה מיידית</p>
+        </div>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box" id="modal-content">
+            <h2 class="modal-title" id="modal-title"></h2>
+            <p style="margin-bottom: 25px; color: var(--slate-300); font-size: 1.1rem;" id="modal-message"></p>
+            <button class="modal-btn" onclick="GameLogic.init()">יאללה, עוד סיבוב!</button>
+        </div>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div class="modal-overlay" id="help-modal">
+        <div class="modal-box" style="position:relative; text-align: right; max-width: 400px;">
+            <button style="position: absolute; top: 15px; left: 15px; background: none; border: none; color: white; font-size: 1.5rem;" onclick="GameLogic.closeHelp()">✕</button>
+            <h2 style="color: var(--indigo-400); margin-bottom: 15px;">📜 איך משחקים?</h2>
+            <div style="color: var(--slate-300); font-size: 0.95rem; line-height: 1.6;">
+                <p style="margin-bottom: 15px; border-right: 3px solid var(--indigo-500); padding-right: 10px;">
+                    <strong>המטרה:</strong> להשתמש ביכולת הסקה כדי לבודד את היצור הסודי מתוך קבוצת חשודים.
+                </p>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 10px;">• <strong>פסילה:</strong> הקש על יצור שאינו מתאים לסימון "פסול".</li>
+                    <li style="margin-bottom: 10px;">• <strong>שאלה:</strong> בחר מאפיין כדי לצמצם את האפשרויות.</li>
+                    <li style="margin-bottom: 10px;">• <strong>רמז:</strong> השתמש במטבעות כדי לקבל מידע אמין שחושף תכונה של היצור הסודי.</li>
+                    <li style="margin-bottom: 10px;">• <strong>ניחוש:</strong> כשאתה בטוח, הפעל "🎯 ניחוש" ובחר את היצור.</li>
                 </ul>
             </div>
-            <button onclick="GameLogic.closeHelp()" class="mt-6 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl w-full transition-transform transform hover:scale-105 touch-manipulation shadow-md">
-                הבנתי, בואו נשחק!
-            </button>
+            <button class="modal-btn" style="margin-top: 25px;" onclick="GameLogic.closeHelp()">הבנתי, בואו נשחק!</button>
         </div>
     </div>
 
@@ -186,545 +528,288 @@
          */
         const AudioEngine = {
             ctx: null,
-            
             init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
             },
-
             playTone(freq, type, duration, vol = 0.1) {
                 if (!this.ctx) return;
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
-                
                 osc.type = type;
                 osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                
                 gain.gain.setValueAtTime(0, this.ctx.currentTime);
                 gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.02);
                 gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
-                
                 osc.start();
                 osc.stop(this.ctx.currentTime + duration);
             },
-
             playClick() { this.playTone(600, 'sine', 0.1, 0.05); },
             playEliminate() { this.playTone(300, 'triangle', 0.15, 0.05); },
-            
-            playSuccess() {
-                this.playTone(523.25, 'sine', 0.15, 0.1); 
-                setTimeout(() => this.playTone(659.25, 'sine', 0.2, 0.1), 100); 
-            },
-            
-            playError() {
-                this.playTone(300, 'sawtooth', 0.2, 0.08);
-                setTimeout(() => this.playTone(250, 'sawtooth', 0.3, 0.08), 150);
-            },
-            
-            playMagic() {
-                [440, 554, 659, 880].forEach((freq, i) => {
-                    setTimeout(() => this.playTone(freq, 'sine', 0.4, 0.05), i * 60);
-                });
-            },
-
-            playWin() {
-                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-                    setTimeout(() => this.playTone(freq, 'square', 0.4, 0.05), i * 100);
-                });
-            },
-
-            playLose() {
-                [440, 415, 392, 349].forEach((freq, i) => {
-                    setTimeout(() => this.playTone(freq, 'sawtooth', 0.5, 0.08), i * 200);
-                });
-            }
+            playSuccess() { this.playTone(523.25, 'sine', 0.15, 0.1); setTimeout(() => this.playTone(659.25, 'sine', 0.2, 0.1), 100); },
+            playError() { this.playTone(300, 'sawtooth', 0.2, 0.08); setTimeout(() => this.playTone(250, 'sawtooth', 0.3, 0.08), 150); },
+            playMagic() { [440, 554, 659, 880].forEach((freq, i) => setTimeout(() => this.playTone(freq, 'sine', 0.4, 0.05), i * 60)); },
+            playWin() { [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => setTimeout(() => this.playTone(freq, 'square', 0.4, 0.05), i * 100)); },
+            playLose() { [440, 415, 392, 349].forEach((freq, i) => setTimeout(() => this.playTone(freq, 'sawtooth', 0.5, 0.08), i * 200)); }
         };
 
-        document.body.addEventListener('touchstart', () => AudioEngine.init(), { once: true });
-        document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
-
-        /**
-         * מסד נתונים מזוקק למאפיינים ויזואליים בלבד
-         */
         const TraitDB = {
-            colors: [
-                { id: 'red', name: 'אדום', hex: '#ef4444', dark: '#b91c1c' },
-                { id: 'blue', name: 'כחול', hex: '#3b82f6', dark: '#1d4ed8' },
-                { id: 'green', name: 'ירוק', hex: '#22c55e', dark: '#15803d' },
-                { id: 'purple', name: 'סגול', hex: '#a855f7', dark: '#7e22ce' }
-            ],
-            bodies: [
-                { id: 'round', name: 'עגלגל' },
-                { id: 'boxy', name: 'מרובע' },
-                { id: 'triangle', name: 'משולש' }
-            ],
-            eyes: [
-                { id: '1', name: 'עין אחת' },
-                { id: '2', name: 'שתי עיניים' }
-            ],
-            accessories: [
-                { id: 'glasses', name: 'משקפיים' },
-                { id: 'bowtie', name: 'פפיון' },
-                { id: 'sprout', name: 'נבט בראש' },
-                { id: 'hair', name: 'שיער' },
-                { id: 'none', name: 'ללא תוספות' }
-            ]
+            colors: [{id:'red',name:'אדום',hex:'#ef4444',dark:'#b91c1c'}, {id:'blue',name:'כחול',hex:'#3b82f6',dark:'#1d4ed8'}, {id:'green',name:'ירוק',hex:'#22c55e',dark:'#15803d'}, {id:'purple',name:'סגול',hex:'#a855f7',dark:'#7e22ce'}],
+            bodies: [{id:'round',name:'עגלגל'}, {id:'boxy',name:'מרובע'}, {id:'triangle',name:'משולש'}],
+            eyes: [{id:'1',name:'עין אחת'}, {id:'2',name:'שתי עיניים'}],
+            accessories: [{id:'glasses',name:'משקפיים'}, {id:'bowtie',name:'פפיון'}, {id:'sprout',name:'נבט'}, {id:'hair',name:'שיער'}, {id:'none',name:'ללא'}]
         };
 
         const CategoryMap = {
-            color: { name: 'צבע', db: TraitDB.colors },
-            body: { name: 'מבנה גוף', db: TraitDB.bodies },
-            eyes: { name: 'מספר עיניים', db: TraitDB.eyes },
-            accessory: { name: 'תוספות', db: TraitDB.accessories }
+            color: { name: 'צבע', icon: '🎨', db: TraitDB.colors },
+            body: { name: 'גוף', icon: '🔷', db: TraitDB.bodies },
+            eyes: { name: 'עיניים', icon: '👁', db: TraitDB.eyes },
+            accessory: { name: 'תוספות', icon: '✨', db: TraitDB.accessories }
         };
 
-        /**
-         * מנוע וקטורי מונפש
-         */
         const SVGCreator = {
             generate(creature) {
                 const colorObj = TraitDB.colors.find(c => c.id === creature.color);
-                const isRound = creature.body === 'round';
-                const isTriangle = creature.body === 'triangle';
-                const isOneEye = creature.eyes === '1';
-                const acc = creature.accessory;
-                
+                const isRound = creature.body === 'round', isTriangle = creature.body === 'triangle';
+                const isOneEye = creature.eyes === '1', acc = creature.accessory;
                 const gradId = `grad_${creature.id}_${creature.color}`;
-                const floatDelay = (Math.random() * -4).toFixed(2);
-                const blinkDelay = (Math.random() * -5).toFixed(2);
+                const fD = (Math.random() * -4).toFixed(2), bD = (Math.random() * -5).toFixed(2);
 
-                let svg = `<svg viewBox="0 0 100 100" class="w-20 h-20 sm:w-28 sm:h-28 drop-shadow-xl animate-float pointer-events-none" style="animation-delay: ${floatDelay}s" xmlns="http://www.w3.org/2000/svg">`;
-                
-                svg += `
-                    <defs>
-                        <radialGradient id="${gradId}" cx="30%" cy="30%" r="70%">
-                            <stop offset="0%" stop-color="${colorObj.hex}" stop-opacity="1" />
-                            <stop offset="100%" stop-color="${colorObj.dark}" stop-opacity="1" />
-                        </radialGradient>
-                    </defs>
-                `;
-                
-                svg += `<ellipse cx="50" cy="90" rx="30" ry="6" fill="rgba(0,0,0,0.3)" class="animate-shadow" style="animation-delay: ${floatDelay}s" />`;
-                svg += `<path d="M 35 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
-                svg += `<path d="M 55 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
-                
+                let svg = `<svg viewBox="0 0 100 100" class="animate-float" style="animation-delay: ${fD}s" xmlns="http://www.w3.org/2000/svg">`;
+                svg += `<defs><radialGradient id="${gradId}" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="${colorObj.hex}" /><stop offset="100%" stop-color="${colorObj.dark}" /></radialGradient></defs>`;
+                svg += `<ellipse cx="50" cy="90" rx="30" ry="6" fill="rgba(0,0,0,0.3)" />`;
+                svg += `<path d="M 35 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" /><path d="M 55 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
+
                 if (isTriangle) {
-                    svg += `<path d="M 32 60 Q 12 62 14 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
-                    svg += `<path d="M 68 60 Q 88 62 86 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
-                } else {
-                    svg += `<path d="M 20 60 Q 5 60 15 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
-                    svg += `<path d="M 80 60 Q 95 60 85 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
-                }
-
-                if (isRound) {
-                    svg += `<ellipse cx="50" cy="55" rx="35" ry="32" fill="url(#${gradId})" />`;
-                } else if (isTriangle) {
+                    svg += `<path d="M 32 60 Q 12 62 14 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/><path d="M 68 60 Q 88 62 86 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
                     svg += `<path d="M 50 20 Q 55 20 58 26 L 83 76 Q 86 82 80 85 L 20 85 Q 14 82 17 76 L 42 26 Q 45 20 50 20 Z" fill="url(#${gradId})" />`;
                 } else {
-                    svg += `<rect x="20" y="25" width="60" height="60" rx="15" fill="url(#${gradId})" />`;
+                    svg += `<path d="M 20 60 Q 5 60 15 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/><path d="M 80 60 Q 95 60 85 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                    if (isRound) svg += `<ellipse cx="50" cy="55" rx="35" ry="32" fill="url(#${gradId})" />`;
+                    else svg += `<rect x="20" y="25" width="60" height="60" rx="15" fill="url(#${gradId})" />`;
                 }
 
-                const faceOffsetY = isTriangle ? 4 : 0; 
-                
-                let leftEyeX = 32;
-                let rightEyeX = 68;
-                if (isTriangle) {
-                    leftEyeX = 36;
-                    rightEyeX = 64;
-                }
+                const fO = isTriangle ? 4 : 0;
+                let eX1 = isTriangle ? 36 : 32, eX2 = isTriangle ? 64 : 68;
+                const bY = 60 + fO, mY = 70 + fO, eY = 48 + fO;
 
-                const blushY = 60 + faceOffsetY;
-                
                 if (isOneEye) {
-                    svg += `<ellipse cx="32" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
-                    svg += `<ellipse cx="68" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    svg += `<ellipse cx="32" cy="${bY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/><ellipse cx="68" cy="${bY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    svg += `<path d="M 45 ${mY} Q 50 ${mY+5} 55 ${mY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
+                    svg += `<g class="animate-blink" style="transform-origin: 50px ${eY}px; animation-delay: ${bD}s"><circle cx="50" cy="${eY}" r="14" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="50" cy="${eY}" r="6" fill="#0f172a"/></g>`;
                 } else {
-                    svg += `<ellipse cx="${leftEyeX - 6}" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
-                    svg += `<ellipse cx="${rightEyeX + 6}" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
-                }
-
-                const mouthY = 70 + faceOffsetY;
-                if (isTriangle) {
-                    svg += `<path d="M 47 ${mouthY} Q 50 ${mouthY + 4} 53 ${mouthY}" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>`;
-                } else {
-                    svg += `<path d="M 45 ${mouthY} Q 50 ${mouthY + 5} 55 ${mouthY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
-                }
-
-                const eyeY = 48 + faceOffsetY;
-                if (isOneEye) {
-                    svg += `
-                    <g class="animate-blink" style="transform-origin: 50px ${eyeY}px; animation-delay: ${blinkDelay}s">
-                        <circle cx="50" cy="${eyeY}" r="14" fill="white" stroke="#0f172a" stroke-width="2"/>
-                        <circle cx="50" cy="${eyeY}" r="6" fill="#0f172a"/>
-                        <circle cx="48" cy="${eyeY - 2}" r="2" fill="white"/>
-                    </g>`;
-                } else {
-                    svg += `
-                    <g class="animate-blink" style="transform-origin: ${leftEyeX}px ${eyeY}px; animation-delay: ${blinkDelay}s">
-                        <circle cx="${leftEyeX}" cy="${eyeY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/>
-                        <circle cx="${leftEyeX}" cy="${eyeY}" r="4" fill="#0f172a"/>
-                        <circle cx="${leftEyeX - 1}" cy="${eyeY - 1}" r="1.5" fill="white"/>
-                    </g>
-                    <g class="animate-blink" style="transform-origin: ${rightEyeX}px ${eyeY}px; animation-delay: ${blinkDelay}s">
-                        <circle cx="${rightEyeX}" cy="${eyeY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/>
-                        <circle cx="${rightEyeX}" cy="${eyeY}" r="4" fill="#0f172a"/>
-                        <circle cx="${rightEyeX - 1}" cy="${eyeY - 1}" r="1.5" fill="white"/>
-                    </g>`;
+                    svg += `<ellipse cx="${eX1-6}" cy="${bY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/><ellipse cx="${eX2+6}" cy="${bY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    svg += `<path d="M 45 ${mY} Q 50 ${mY+5} 55 ${mY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
+                    svg += `<g class="animate-blink" style="transform-origin: ${eX1}px ${eY}px; animation-delay: ${bD}s"><circle cx="${eX1}" cy="${eY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="${eX1}" cy="${eY}" r="4" fill="#0f172a"/></g>`;
+                    svg += `<g class="animate-blink" style="transform-origin: ${eX2}px ${eY}px; animation-delay: ${bD}s"><circle cx="${eX2}" cy="${eY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="${eX2}" cy="${eY}" r="4" fill="#0f172a"/></g>`;
                 }
 
                 if (acc === 'glasses') {
-                    if (isOneEye) {
-                        svg += `<circle cx="50" cy="${eyeY}" r="18" fill="none" stroke="#1e293b" stroke-width="4"/>`;
-                        svg += `<line x1="15" y1="${eyeY}" x2="32" y2="${eyeY}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>`;
-                        svg += `<line x1="68" y1="${eyeY}" x2="85" y2="${eyeY}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>`;
-                    } else {
-                        svg += `<circle cx="${leftEyeX}" cy="${eyeY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/>`;
-                        svg += `<circle cx="${rightEyeX}" cy="${eyeY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/>`;
-                        svg += `<line x1="${leftEyeX + 14}" y1="${eyeY}" x2="${rightEyeX - 14}" y2="${eyeY}" stroke="#1e293b" stroke-width="3"/>`;
-                    }
+                    if (isOneEye) svg += `<circle cx="50" cy="${eY}" r="18" fill="none" stroke="#1e293b" stroke-width="4"/><line x1="15" y1="${eY}" x2="32" y2="${eY}" stroke="#1e293b" stroke-width="4"/><line x1="68" y1="${eY}" x2="85" y2="${eY}" stroke="#1e293b" stroke-width="4"/>`;
+                    else svg += `<circle cx="${eX1}" cy="${eY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/><circle cx="${eX2}" cy="${eY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/><line x1="${eX1+14}" y1="${eY}" x2="${eX2-14}" y2="${eY}" stroke="#1e293b" stroke-width="3"/>`;
                 } else if (acc === 'bowtie') {
                     const btY = isTriangle ? 80 : 82;
-                    svg += `<polygon points="50,${btY} 40,${btY - 5} 40,${btY + 5}" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>`;
-                    svg += `<polygon points="50,${btY} 60,${btY - 5} 60,${btY + 5}" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>`;
-                    svg += `<circle cx="50" cy="${btY}" r="3" fill="#fca5a5" stroke="#7f1d1d" stroke-width="1"/>`;
+                    svg += `<polygon points="50,${btY} 40,${btY-5} 40,${btY+5}" fill="#ef4444" /><polygon points="50,${btY} 60,${btY-5} 60,${btY+5}" fill="#ef4444" /><circle cx="50" cy="${btY}" r="3" fill="white" />`;
                 } else if (acc === 'sprout') {
-                    const topY = isTriangle ? 20 : (isRound ? 23 : 25);
-                    svg += `<path d="M 50 ${topY} Q 45 ${topY - 10} 55 ${topY - 15}" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round"/>`;
-                    svg += `<path d="M 55 ${topY - 15} Q 60 ${topY - 10} 50 ${topY - 5} Z" fill="#22c55e" stroke="#15803d" stroke-width="1"/>`;
-                    svg += `<path d="M 50 ${topY - 5} Q 40 ${topY - 10} 45 ${topY - 15} Z" fill="#4ade80" stroke="#15803d" stroke-width="1"/>`;
+                    const tY = isTriangle ? 20 : (isRound ? 23 : 25);
+                    svg += `<path d="M 50 ${tY} Q 45 ${tY-10} 55 ${tY-15}" fill="none" stroke="#15803d" stroke-width="2"/><path d="M 55 ${tY-15} Q 60 ${tY-10} 50 ${tY-5} Z" fill="#22c55e" />`;
                 } else if (acc === 'hair') {
-                    if (isTriangle) {
-                        // עיצוב שיער המותאם ייעודית לקודקוד המשולש ומונע ציפה
-                        svg += `<path d="M 44 26 Q 47 8 50 15 Q 54 5 57 24 Q 50 20 44 26 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" stroke-linejoin="round"/>`;
-                    } else {
-                        // בלורית קוצנית במרכז הראש למבנה עגלגל ומרובע
-                        const headTopY = isRound ? 23 : 25;
-                        svg += `<path d="M 40 ${headTopY+2} Q 44 ${headTopY-12} 47 ${headTopY-1} Q 50 ${headTopY-18} 53 ${headTopY-1} Q 56 ${headTopY-10} 60 ${headTopY+2} Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" stroke-linejoin="round"/>`;
-                    }
+                    if (isTriangle) svg += `<path d="M 44 26 Q 47 8 50 15 Q 54 5 57 24 Q 50 20 44 26 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" />`;
+                    else svg += `<path d="M 40 25 Q 44 13 47 24 Q 50 7 53 24 Q 56 15 60 27 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" />`;
                 }
-
                 svg += `</svg>`;
                 return svg;
             }
         };
 
-        /**
-         * לוגיקת המשחק
-         */
         const GameLogic = {
-            creatures: [],
-            secretCreatureId: null,
-            coins: 2,
-            askedQuestions: new Set(),
-            
-            els: {
-                grid: document.getElementById('creatures-grid'),
-                catSelect: document.getElementById('trait-category'),
-                valSelect: document.getElementById('trait-value'),
-                btnAsk: document.getElementById('btn-ask'),
-                historyList: document.getElementById('history-list'),
-                noHistoryMsg: document.getElementById('no-history-msg'),
-                coinsContainer: document.getElementById('coins-container'),
-                btnHint: document.getElementById('btn-hint'),
-                helpModal: document.getElementById('help-modal')
-            },
+            creatures: [], secretCreatureId: null, coins: 2, askedQuestions: new Set(),
+            selectedCategory: 'color', accuseMode: false, historyCount: 0, firstActionTaken: false,
 
             init() {
-                this.coins = 2;
-                this.askedQuestions.clear();
-                this.generateCreatures(10); 
-                
-                const randomIndex = Math.floor(Math.random() * this.creatures.length);
-                this.secretCreatureId = this.creatures[randomIndex].id;
-                
-                this.resetUI();
-                this.renderCoins();
-                this.renderGrid();
-                this.populateDropdowns();
+                this.coins = 2; this.askedQuestions.clear(); this.accuseMode = false; this.historyCount = 0; this.firstActionTaken = false;
+                this.generateCreatures(10);
+                this.secretCreatureId = this.creatures[Math.floor(Math.random() * this.creatures.length)].id;
+                this.resetUI(); this.renderCoins(); this.renderGrid();
+                document.getElementById('onboardingHint').style.display = 'block';
             },
 
-            getRandomTrait(array) {
-                return array[Math.floor(Math.random() * array.length)].id;
-            },
-
-            generateCreatures(count) {
+            generateCreatures(n) {
                 this.creatures = [];
-                for (let i = 0; i < count; i++) {
-                    const creature = {
-                        id: i + 1,
-                        name: `יצור #${i + 1}`,
-                        color: this.getRandomTrait(TraitDB.colors),
-                        body: this.getRandomTrait(TraitDB.bodies),
-                        eyes: this.getRandomTrait(TraitDB.eyes),
-                        accessory: this.getRandomTrait(TraitDB.accessories),
-                        eliminated: false
-                    };
-                    this.creatures.push(creature);
+                const rF = (a) => a[Math.floor(Math.random() * a.length)].id;
+                for (let i = 0; i < n; i++) {
+                    this.creatures.push({ id: i+1, name: `יצור #${i+1}`, color: rF(TraitDB.colors), body: rF(TraitDB.bodies), eyes: rF(TraitDB.eyes), accessory: rF(TraitDB.accessories), eliminated: false });
                 }
             },
 
             resetUI() {
-                document.getElementById('modal').classList.add('hidden');
-                this.els.helpModal.classList.add('hidden');
-                this.els.historyList.innerHTML = '';
-                this.els.historyList.appendChild(this.els.noHistoryMsg);
-                this.els.noHistoryMsg.style.display = 'block';
-                this.updateButtonsState();
-                this.updateAskButtonState();
+                document.getElementById('modal').classList.remove('open');
+                document.getElementById('help-modal').classList.remove('open');
+                document.getElementById('questionLog').innerHTML = '';
+                document.getElementById('questionLog').classList.remove('open');
+                document.getElementById('logArrow').textContent = '▲';
+                document.getElementById('btn-accuse').classList.remove('active');
+                document.getElementById('btn-accuse').textContent = '🎯 ניחוש';
+                this.updateLogLabel();
             },
 
             renderCoins() {
-                this.els.coinsContainer.innerHTML = '';
-                for (let i = 0; i < this.coins; i++) {
-                    this.els.coinsContainer.innerHTML += `<span class="drop-shadow-md">🪙</span>`;
-                }
-                if (this.coins === 0) {
-                    this.els.coinsContainer.innerHTML = `<span class="text-slate-600 text-sm">אין מטבעות</span>`;
-                }
-                this.updateButtonsState();
-            },
-
-            updateButtonsState() {
-                const canBuy = this.coins > 0;
-                this.els.btnHint.disabled = !canBuy;
-                
-                if (this.els.btnHint.disabled) {
-                    this.els.btnHint.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    this.els.btnHint.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-            },
-
-            updateAskButtonState() {
-                const category = this.els.catSelect.value;
-                const value = this.els.valSelect.value;
-                const isAsked = this.askedQuestions.has(`${category}-${value}`);
-                
-                if (isAsked) {
-                    this.els.btnAsk.disabled = true;
-                    this.els.btnAsk.innerHTML = `<span>✔️</span> נשאל כבר`;
-                    this.els.btnAsk.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-600', 'hover:bg-slate-600');
-                    this.els.btnAsk.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
-                } else {
-                    this.els.btnAsk.disabled = false;
-                    this.els.btnAsk.innerHTML = `<span>❓</span> שאל שאלה`;
-                    this.els.btnAsk.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-600', 'hover:bg-slate-600');
-                    this.els.btnAsk.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
-                }
-            },
-
-            populateDropdowns() {
-                this.els.catSelect.innerHTML = '';
-                Object.keys(CategoryMap).forEach(key => {
-                    const option = document.createElement('option');
-                    option.value = key;
-                    option.textContent = CategoryMap[key].name;
-                    this.els.catSelect.appendChild(option);
-                });
-
-                this.els.catSelect.addEventListener('change', () => {
-                    AudioEngine.playClick();
-                    this.updateValueDropdown();
-                });
-                
-                this.els.valSelect.addEventListener('change', () => {
-                    this.updateAskButtonState();
-                });
-
-                this.updateValueDropdown();
-            },
-
-            updateValueDropdown() {
-                const selectedCat = this.els.catSelect.value;
-                const db = CategoryMap[selectedCat].db;
-                
-                this.els.valSelect.innerHTML = '';
-                db.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.id;
-                    option.textContent = item.name + (item.icon ? ` ${item.icon}` : '');
-                    this.els.valSelect.appendChild(option);
-                });
-                
-                this.updateAskButtonState();
+                document.getElementById('coins-container').innerHTML = this.coins > 0 ? Array(this.coins).fill('<span>🪙</span>').join('') : '<span style="font-size:0.7rem; color:var(--slate-600)">אין</span>';
+                document.getElementById('btn-hint').disabled = this.coins < 1;
             },
 
             renderGrid() {
-                this.els.grid.innerHTML = '';
-                
-                this.creatures.forEach(creature => {
+                const grid = document.getElementById('creatures-grid'); grid.innerHTML = '';
+                this.creatures.forEach(c => {
                     const card = document.createElement('div');
-                    card.className = `creature-card bg-slate-800 border border-slate-700 rounded-xl p-3 flex flex-col items-center shadow-lg ${creature.eliminated ? 'eliminated' : 'hover:border-indigo-500 hover:shadow-indigo-500/20'}`;
-                    
-                    const svgMarkup = SVGCreator.generate(creature);
-
-                    card.innerHTML = `
-                        <div class="creature-svg-wrapper mb-3 flex justify-center items-center h-24 sm:h-32 w-full bg-slate-900/50 rounded-xl border border-slate-700 shadow-inner">
-                            ${svgMarkup}
-                        </div>
-                        
-                        <div class="flex gap-1 w-full mt-auto">
-                            <button onclick="GameLogic.toggleEliminate(${creature.id})" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg font-medium transition-colors text-xs border border-slate-600 touch-manipulation">
-                                ${creature.eliminated ? 'החזר' : 'פסול'}
-                            </button>
-                            <button onclick="GameLogic.accuse(${creature.id})" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg font-bold transition-colors text-xs shadow-md touch-manipulation" ${creature.eliminated ? 'disabled' : ''}>
-                                זה הוא!
-                            </button>
-                        </div>
-                    `;
-                    
-                    this.els.grid.appendChild(card);
+                    card.className = `mini-card${c.eliminated ? ' eliminated' : ''}${this.accuseMode && !c.eliminated ? ' accuse-target' : ''}`;
+                    card.onclick = () => {
+                        this.triggerAction();
+                        if (this.accuseMode) { if (!c.eliminated) this.accuse(c.id); }
+                        else { this.toggleEliminate(c.id); }
+                    };
+                    card.innerHTML = `<div class="mini-svg-stage">${SVGCreator.generate(c)}</div>`;
+                    grid.appendChild(card);
                 });
             },
 
-            askQuestion() {
-                const category = this.els.catSelect.value;
-                const value = this.els.valSelect.value;
-                const questionKey = `${category}-${value}`;
-                
-                if (this.askedQuestions.has(questionKey)) {
-                    AudioEngine.playError();
-                    return;
+            triggerAction() {
+                if (!this.firstActionTaken) {
+                    this.firstActionTaken = true;
+                    document.getElementById('onboardingHint').style.display = 'none';
                 }
-
-                AudioEngine.playClick();
-                this.askedQuestions.add(questionKey);
-                
-                const catName = CategoryMap[category].name;
-                const valName = this.els.valSelect.options[this.els.valSelect.selectedIndex].text;
-                
-                this.processQuestion(category, value, catName, valName);
-                this.updateAskButtonState();
-            },
-
-            processQuestion(category, value, catName, valName) {
-                const secret = this.creatures.find(c => c.id === this.secretCreatureId);
-                const isTrue = secret[category] === value;
-
-                if (isTrue) {
-                    AudioEngine.playSuccess();
-                } else {
-                    AudioEngine.playError();
-                }
-
-                this.logHistory(`האם ה${catName} הוא ${valName}?`, isTrue);
-            },
-
-            logHistory(questionText, isTrue) {
-                this.els.noHistoryMsg.style.display = 'none';
-                
-                const li = document.createElement('li');
-                li.className = `p-2 rounded-lg border-r-4 shadow-sm flex items-start gap-2 ${isTrue ? 'bg-green-900/30 border-green-500 text-green-100' : 'bg-red-900/30 border-red-500 text-red-100'}`;
-                
-                const icon = isTrue ? '✅' : '❌';
-                const answerText = isTrue ? 'כן' : 'לא';
-
-                li.innerHTML = `
-                    <span class="text-base mt-0.5">${icon}</span>
-                    <div class="flex flex-col">
-                        <span class="font-bold text-xs text-slate-300">${questionText}</span>
-                        <span class="font-black text-sm">${answerText}</span>
-                    </div>
-                `;
-                
-                this.els.historyList.prepend(li);
-            },
-
-            buyHint() {
-                if (this.coins < 1) return;
-                AudioEngine.playMagic();
-                
-                this.coins--;
-                this.renderCoins();
-
-                const secret = this.creatures.find(c => c.id === this.secretCreatureId);
-                
-                // חיפוש רמז שטרם התגלה (או נשאל)
-                const hintCategories = Object.keys(CategoryMap);
-                let randomCat = '';
-                let traitValue = '';
-                let attempts = 0;
-                
-                do {
-                    randomCat = hintCategories[Math.floor(Math.random() * hintCategories.length)];
-                    traitValue = secret[randomCat];
-                    attempts++;
-                } while (this.askedQuestions.has(`${randomCat}-${traitValue}`) && attempts < 20);
-
-                // סימון הרמז כשאלה שנשאלה כדי למנוע כפילויות בהמשך
-                this.askedQuestions.add(`${randomCat}-${traitValue}`);
-                this.updateAskButtonState();
-                
-                const catName = CategoryMap[randomCat].name;
-                const valObj = CategoryMap[randomCat].db.find(item => item.id === traitValue);
-                const valName = valObj.name + (valObj.icon ? ` ${valObj.icon}` : '');
-
-                this.els.noHistoryMsg.style.display = 'none';
-                const li = document.createElement('li');
-                li.className = 'p-2 rounded-lg border-r-4 shadow-sm bg-yellow-900/30 border-yellow-500 text-yellow-100 flex items-start gap-2';
-                
-                li.innerHTML = `
-                    <span class="text-base mt-0.5">💡</span>
-                    <div class="flex flex-col">
-                        <span class="font-bold text-xs text-yellow-500">רמז שהתגלה:</span>
-                        <span class="font-black text-sm">ה${catName} הוא ${valName}</span>
-                    </div>
-                `;
-                this.els.historyList.prepend(li);
             },
 
             toggleEliminate(id) {
                 AudioEngine.playEliminate();
-                const creature = this.creatures.find(c => c.id === id);
-                if (creature) {
-                    creature.eliminated = !creature.eliminated;
-                    this.renderGrid();
-                }
+                const c = this.creatures.find(x => x.id === id);
+                if (c) { c.eliminated = !c.eliminated; this.renderGrid(); }
             },
+
+            toggleAccuseMode() {
+                this.triggerAction();
+                this.accuseMode = !this.accuseMode;
+                const b = document.getElementById('btn-accuse');
+                b.classList.toggle('active', this.accuseMode);
+                b.textContent = this.accuseMode ? '❌ ביטול' : '🎯 ניחוש';
+                AudioEngine.playClick(); this.renderGrid();
+            },
+
+            askQuestionFromChip(valId) {
+                this.triggerAction();
+                const cat = this.selectedCategory;
+                const key = `${cat}-${valId}`;
+                if (this.askedQuestions.has(key)) { AudioEngine.playError(); return; }
+
+                this.askedQuestions.add(key);
+                const secret = this.creatures.find(x => x.id === this.secretCreatureId);
+                const isTrue = secret[cat] === valId;
+                
+                if (isTrue) AudioEngine.playSuccess(); else AudioEngine.playError();
+                
+                const catName = CategoryMap[cat].name;
+                const valName = CategoryMap[cat].db.find(i=>i.id===valId).name;
+                const qText = `האם ה${catName} הוא ${valName}?`;
+                
+                this.logHistory(qText, isTrue, 'question');
+                this.showToast(isTrue ? 'כן!' : 'לא...', isTrue ? 'success' : 'error', qText);
+                closeSheet();
+            },
+
+            buyHint() {
+                if (this.coins < 1) return;
+                this.triggerAction();
+                this.coins--; this.renderCoins(); AudioEngine.playMagic();
+                const secret = this.creatures.find(x => x.id === this.secretCreatureId);
+                const cats = Object.keys(CategoryMap);
+                const cat = cats[Math.floor(Math.random() * cats.length)];
+                const valName = CategoryMap[cat].db.find(i => i.id === secret[cat]).name;
+                
+                const text = `ה${CategoryMap[cat].name} הוא ${valName}`;
+                this.logHistory(text, true, 'hint');
+                this.showToast(valName, 'hint', `רמז: ה${CategoryMap[cat].name} הוא`);
+            },
+
+            showToast(msg, type, context) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                if (type === 'error') toast.style.borderColor = 'var(--red-500)';
+                if (type === 'success') toast.style.borderColor = 'var(--green-500)';
+                if (type === 'hint') toast.style.borderColor = 'var(--yellow-500)';
+
+                const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : '💡');
+                toast.innerHTML = `<div class="toast-icon">${icon}</div><div class="toast-content"><span class="toast-title">${context}</span><span class="toast-message">${msg}</span></div>`;
+                
+                container.appendChild(toast);
+                setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 3000);
+            },
+
+            logHistory(text, isTrue, type) {
+                const log = document.getElementById('questionLog');
+                this.historyCount++; this.updateLogLabel();
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                if (type === 'hint') entry.innerHTML = `<span>💡</span><span style="flex:1">${text}</span><span style="color:var(--yellow-500)">רמז</span>`;
+                else entry.innerHTML = `<span>${isTrue?'✅':'❌'}</span><span style="flex:1">${text}</span><span style="font-weight:900; color:${isTrue?'var(--green-500)':'var(--red-500)'}">${isTrue?'כן':'לא'}</span>`;
+                log.prepend(entry);
+            },
+
+            updateLogLabel() { document.getElementById('log-label').textContent = `היסטוריה (${this.historyCount})`; },
 
             accuse(id) {
-                const creature = this.creatures.find(c => c.id === id);
-                if (id === this.secretCreatureId) {
-                    AudioEngine.playWin();
-                    this.showModal('ניצחון! 🏆', `אכן, ${creature.name} הוא היצור הסודי.`, 'border-green-500', 'text-green-500');
-                } else {
-                    AudioEngine.playLose();
-                    const secretCr = this.creatures.find(c => c.id === this.secretCreatureId);
-                    this.showModal('טעות מרה! ❌', `היצור האמיתי היה ${secretCr.name}.`, 'border-red-500', 'text-red-500');
+                if (id === this.secretCreatureId) { 
+                    AudioEngine.playWin(); 
+                    this.showModal('שיחקת אותה! 🏆', 'אתה אלוף הבלשים! מצאת את המטרה בול.', 'var(--green-500)'); 
+                }
+                else { 
+                    AudioEngine.playLose(); 
+                    this.showModal('אופס! 💨', 'היצור הסודי הצליח להתחמק... נסה שוב!', 'var(--red-500)'); 
                 }
             },
 
-            showModal(title, message, borderColorClass, titleColorClass) {
-                document.getElementById('modal-title').innerText = title;
-                document.getElementById('modal-title').className = `text-3xl font-black mb-3 ${titleColorClass}`;
-                document.getElementById('modal-message').innerText = message;
-                document.getElementById('modal-content').className = `bg-slate-800 p-6 rounded-3xl border-2 max-w-sm w-full text-center shadow-2xl ${borderColorClass}`;
-                document.getElementById('modal').classList.remove('hidden');
+            showModal(t, m, c) {
+                document.getElementById('modal-title').textContent = t;
+                document.getElementById('modal-title').style.color = c;
+                document.getElementById('modal-message').textContent = m;
+                document.getElementById('modal').classList.add('open');
             },
 
-            showHelp() {
-                AudioEngine.playClick();
-                this.els.helpModal.classList.remove('hidden');
+            showHelp() { AudioEngine.playClick(); document.getElementById('help-modal').classList.add('open'); },
+            closeHelp() { AudioEngine.playClick(); document.getElementById('help-modal').classList.remove('open'); },
+
+            renderCategoryTabs() {
+                const c = document.getElementById('category-tabs'); c.innerHTML = '';
+                Object.keys(CategoryMap).forEach(k => {
+                    const btn = document.createElement('button');
+                    btn.className = `category-tab${this.selectedCategory===k?' active':''}`;
+                    btn.textContent = `${CategoryMap[k].icon} ${CategoryMap[k].name}`;
+                    btn.onclick = () => { this.selectedCategory = k; this.renderCategoryTabs(); this.renderTraitChips(); };
+                    c.appendChild(btn);
+                });
             },
 
-            closeHelp() {
-                AudioEngine.playClick();
-                this.els.helpModal.classList.add('hidden');
+            renderTraitChips() {
+                const c = document.getElementById('trait-chips'); c.innerHTML = '';
+                CategoryMap[this.selectedCategory].db.forEach(i => {
+                    const isAsked = this.askedQuestions.has(`${this.selectedCategory}-${i.id}`);
+                    const btn = document.createElement('button');
+                    btn.className = `trait-chip${isAsked?' asked':''}`;
+                    btn.textContent = i.name;
+                    if (!isAsked) btn.onclick = () => { this.askQuestionFromChip(i.id); };
+                    c.appendChild(btn);
+                });
             }
         };
 
-        // אתחול אירועים בלחיצה
-        document.getElementById('btn-ask').addEventListener('click', () => GameLogic.askQuestion());
-        
-        window.addEventListener('DOMContentLoaded', () => GameLogic.init());
+        function toggleLog() { document.getElementById('questionLog').classList.toggle('open'); document.getElementById('logArrow').textContent = document.getElementById('questionLog').classList.contains('open') ? '▼' : '▲'; }
+        function openSheet() { AudioEngine.playClick(); GameLogic.renderCategoryTabs(); GameLogic.renderTraitChips(); document.getElementById('sheetOverlay').classList.add('open'); document.getElementById('questionSheet').classList.add('open'); }
+        function closeSheet() { document.getElementById('sheetOverlay').classList.remove('open'); document.getElementById('questionSheet').classList.remove('open'); }
 
+        window.addEventListener('DOMContentLoaded', () => GameLogic.init());
     </script>
 </body>
+
 </html>
