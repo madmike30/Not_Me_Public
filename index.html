@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="היצור הסודי">
 
-    <title>היצור הסודי מתחבא! מצאו אותו!</title>
+    <title>היצור הסודי חמק שוב! מצאו אותו!</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
 
@@ -51,7 +51,7 @@
             touch-action: manipulation;
         }
 
-        /* --- Header Section Optimized --- */
+        /* --- Header Section --- */
         .top-bar {
             display: flex;
             align-items: center;
@@ -72,28 +72,11 @@
             min-width: 0;
         }
 
-        .game-title-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            min-width: 0;
-        }
-
         .game-title {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 900;
             color: var(--indigo-400);
-            flex-shrink: 0;
-        }
-
-        .game-subtitle {
-            font-size: 0.7rem;
-            font-weight: 400;
-            color: var(--slate-400);
-            border-right: 1px solid var(--slate-600);
-            padding-right: 6px;
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -115,7 +98,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Help button attention seeker */
         @keyframes pulse-help {
             0%, 100% { transform: scale(1); background-color: var(--slate-700); }
             50% { transform: scale(1.25); background-color: var(--indigo-600); box-shadow: 0 0 15px var(--indigo-500); }
@@ -146,13 +128,10 @@
         }
 
         .stat-label-text {
-            font-size: 0.65rem;
-            color: var(--slate-500);
+            font-size: 0.7rem;
+            color: var(--slate-400);
             font-weight: 700;
         }
-
-        .stat-icon { flex-shrink: 0; }
-        .stat-divider { width: 1px; height: 14px; background: rgba(255, 255, 255, 0.1); }
 
         .reset-action {
             background: transparent;
@@ -210,7 +189,7 @@
 
         .mini-card.eliminated {
             filter: grayscale(100%);
-            opacity: 0.35;
+            opacity: 0.3;
         }
 
         .mini-card.eliminated::after {
@@ -300,8 +279,8 @@
         .action-btn:active { transform: scale(0.96); }
 
         .btn-ask { background: var(--indigo-600); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-        .btn-hint { background: var(--slate-700); color: var(--yellow-500); border: 1px solid rgba(234, 179, 8, 0.2); }
-        .btn-accuse { background: var(--slate-700); color: var(--red-500); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .btn-hint { background: var(--slate-700); color: var(--yellow-500); border: 1px solid rgba(234,179,8,0.2); }
+        .btn-accuse { background: var(--slate-700); color: var(--red-500); border: 1px solid rgba(239,68,68,0.2); }
         .btn-accuse.active { background: var(--red-500); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
 
         /* --- Bottom Sheet --- */
@@ -358,13 +337,6 @@
         }
         .trait-chip.asked { opacity: 0.2; pointer-events: none; }
 
-        /* --- Modals --- */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; backdrop-filter: blur(5px); }
-        .modal-overlay.open { display: flex; }
-        .modal-box { background: var(--slate-800); padding: 30px; border-radius: 28px; border: 2px solid var(--slate-700); width: 100%; max-width: 360px; text-align: center; }
-        .modal-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 12px; }
-        .modal-btn { width: 100%; min-height: 56px; border: none; border-radius: 18px; background: var(--indigo-600); color: white; font-weight: 900; font-size: 1.2rem; margin-top: 15px; }
-
         /* --- Countdown Overlay --- */
         .countdown-overlay {
             position: fixed;
@@ -378,14 +350,21 @@
             backdrop-filter: blur(10px);
         }
         .countdown-overlay.active { display: flex; }
-        .countdown-title { font-size: 1.5rem; font-weight: 900; color: var(--indigo-400); margin-bottom: 1rem; opacity: 0.8; }
+        .countdown-title { font-size: 1.3rem; font-weight: 900; color: var(--indigo-400); margin-bottom: 1rem; opacity: 0.9; text-align: center; padding: 0 20px; }
         .countdown-number { font-size: 8rem; font-weight: 900; color: white; text-shadow: 0 0 30px var(--indigo-600); animation: pop-number 1s infinite; }
         @keyframes pop-number { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
 
+        /* --- Log & Modals --- */
         .log-toggle { padding: 12px; text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--slate-400); cursor: pointer; }
         .question-log { max-height: 0; overflow: hidden; background: var(--slate-900); transition: max-height 0.3s; }
         .question-log.open { max-height: 140px; overflow-y: auto; }
         .log-entry { padding: 10px 16px; border-bottom: 1px solid var(--slate-800); font-size: 0.8rem; display: flex; align-items: center; gap: 8px; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--slate-800); padding: 30px; border-radius: 28px; border: 2px solid var(--slate-700); width: 100%; max-width: 360px; text-align: center; }
+        .modal-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 12px; }
+        .modal-btn { width: 100%; min-height: 56px; border: none; border-radius: 18px; background: var(--indigo-600); color: white; font-weight: 900; font-size: 1.2rem; margin-top: 15px; }
 
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         .animate-float { animation: float 4s ease-in-out infinite; }
@@ -397,7 +376,7 @@
 <body>
     <!-- COUNTDOWN OVERLAY -->
     <div id="countdown-overlay" class="countdown-overlay">
-        <span id="countdown-round-text" class="countdown-title">סיבוב מתחיל!</span>
+        <span id="countdown-round-text" class="countdown-title">הוא חמק שוב! מחפשים...</span>
         <span id="countdown-number" class="countdown-number">3</span>
     </div>
 
@@ -406,31 +385,15 @@
     <header class="top-bar">
         <div class="top-bar-right">
             <button class="help-btn" id="mainHelpBtn" onclick="GameLogic.showHelp()">?</button>
-            <div class="game-title-group">
-                <span class="game-title">היצור הסודי</span>
-                <span class="game-subtitle">מתחבא! מצאו אותו!</span>
-            </div>
+            <span class="game-title">היצור הסודי מתחבא! מצאו אותו!</span>
         </div>
         
-        <!-- Progress System Badge -->
         <div class="header-progress-pill">
             <div class="stat-badge" title="סיבוב נוכחי">
                 <span class="stat-label-text">סיבוב</span>
                 <span id="rounds-val">1</span>
             </div>
-            <div class="stat-divider"></div>
-            <div class="stat-badge" title="ניצחונות">
-                <svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--yellow-500)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-                    <path d="M4 22h16"></path>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
-                </svg>
-                <span id="wins-val">0</span>
-            </div>
-            <button onclick="GameLogic.resetStats()" class="reset-action" title="איפוס סטטיסטיקות">
+            <button onclick="GameLogic.resetStats()" class="reset-action" title="התחל מחדש">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
             </button>
         </div>
@@ -464,24 +427,39 @@
         <div class="modal-box">
             <h2 class="modal-title" id="modal-title"></h2>
             <p id="modal-message" style="color: var(--slate-300); margin-bottom: 20px; font-size: 1.1rem;"></p>
-            <button class="modal-btn" onclick="GameLogic.init()">סיבוב נוסף!</button>
+            <button class="modal-btn" id="modal-action-btn" onclick="GameLogic.init(false)">נמשיך במרדף!</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="help-modal">
-        <div class="modal-box" style="text-align: right;">
-            <h2 style="color: var(--indigo-400); margin-bottom: 15px;">📜 איך משחקים?</h2>
-            <div style="color: var(--slate-300); font-size: 0.95rem; line-height: 1.6;">
-                <p style="margin-bottom: 12px; font-weight: 700; color: white;">המטרה: למצוא את היצור שהתחבא!</p>
-                <ul style="list-style: none;">
-                    <li style="margin-bottom: 10px;">• <b>שואלים שאלות:</b> בודקים תכונות (צבע, גוף וכו').</li>
-                    <li style="margin-bottom: 10px;">• <b>פסילה:</b> געו ביצור שאינו מתאים כדי להוציאו מהמשחק.</li>
-                    <li style="margin-bottom: 10px;">• <b>רמז:</b> המטבעות חושפים מידע ודאי על היצור הסודי.</li>
-                    <li style="margin-bottom: 10px;">• <b>ניחוש:</b> בטוחים? לחצו "🎯 ניחוש" ואז על היצור.</li>
-                    <li style="margin-bottom: 10px;">• <b>ניקוד:</b> מקבלים נקודות על כל ניחוש נכון. אלופים!</li>
+        <div class="modal-box" style="text-align: right; border: 3px solid var(--indigo-500);">
+            <h2 style="color: var(--indigo-400); margin-bottom: 15px; font-size: 1.8rem; text-align: center;">איך משחקים? 🕵️</h2>
+            <div style="color: var(--slate-100); font-size: 1.05rem; line-height: 1.6;">
+                <p style="margin-bottom: 15px; font-weight: 900; color: white; border-bottom: 2px solid var(--slate-700); padding-bottom: 5px;">המטרה: למצוא את היצור הסודי בשיא המהירות!</p>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 12px; display: flex; gap: 10px;">
+                        <span style="font-size: 1.4rem;">❓</span>
+                        <div><strong>שואלים שאלה:</strong> בוחרים צבע או צורה ומגלים פרטים על היצור הסודי.</div>
+                    </li>
+                    <li style="margin-bottom: 12px; display: flex; gap: 10px;">
+                        <span style="font-size: 1.4rem;">💡</span>
+                        <div><strong>משתמשים ברמז:</strong> מטבע נותן רמז זהב שמגלה תכונה בטוחה של היצור.</div>
+                    </li>
+                    <li style="margin-bottom: 12px; display: flex; gap: 10px;">
+                        <span style="font-size: 1.4rem;">❌</span>
+                        <div><strong>פוסלים ומסתירים:</strong> יצור לא מתאים? נוגעים בו כדי להסתיר אותו מהלוח.</div>
+                    </li>
+                    <li style="margin-bottom: 12px; display: flex; gap: 10px;">
+                        <span style="font-size: 1.4rem;">🎯</span>
+                        <div><strong>מנחשים:</strong> בטוחים ב-100%? לוחצים "ניחוש" ואז על היצור שבחרתם.</div>
+                    </li>
                 </ul>
+                <p style="margin-top: 15px; background: var(--indigo-900-30); padding: 10px; border-radius: 12px; font-weight: 700; text-align: center;">
+                    מצאתם? עוברים לסיבוב הבא! <br>
+                    טעיתם? חוזרים להתחלה...
+                </p>
             </div>
-            <button class="modal-btn" onclick="GameLogic.closeHelp()">הבנתי, בואו נשחק!</button>
+            <button class="modal-btn" onclick="GameLogic.closeHelp()">קדימה, למצוא אותו!</button>
         </div>
     </div>
 
@@ -560,43 +538,59 @@
 
         const GameLogic = {
             creatures: [], secretId: null, coins: 2, asked: new Set(), cat: 'color', mode: false, count: 0,
-            score: 0, round: 1,
+            round: 1,
 
-            init(isResetStats = false) {
-                if (isResetStats) { this.score = 0; this.round = 1; }
-                this.coins = 2; this.asked.clear(); this.mode = false; this.count = 0;
+            init(isHardReset = true) {
+                if (isHardReset) { this.round = 1; this.coins = 2; }
+                this.asked.clear();
+                this.mode = false;
+                this.count = 0;
                 this.generate(9);
                 this.secretId = this.creatures[Math.floor(Math.random()*9)].id;
-                
                 this.resetUI();
                 
-                // Show countdown for round 2 and up
-                if (this.round > 1 && !isResetStats) {
+                if (this.round > 1 && !isHardReset) {
                     this.runCountdown().then(() => {
                         this.renderGrid();
                         this.renderCoins();
                         this.updateStatsUI();
                     });
                 } else {
-                    // Round 1 specific behavior: Blinking Help Button
                     this.renderGrid();
                     this.renderCoins();
                     this.updateStatsUI();
-                    
-                    if (this.round === 1) {
-                        this.triggerHelpBlink();
+                    if (this.round === 1) this.triggerHelpBlink();
+                }
+            },
+
+            generate(n) {
+                this.creatures = [];
+                const seen = new Set();
+                const r = (a) => a[Math.floor(Math.random()*a.length)].id;
+                const commonTraits = {};
+                if (this.round >= 3) commonTraits.color = r(TraitDB.colors);
+                if (this.round >= 5) commonTraits.body = r(TraitDB.bodies);
+                if (this.round >= 7) commonTraits.eyes = r(TraitDB.eyes);
+                if (this.round >= 9) commonTraits.accessory = r(TraitDB.accessories);
+
+                while(this.creatures.length < n) {
+                    const t = {
+                        color: commonTraits.color || r(TraitDB.colors),
+                        body: commonTraits.body || r(TraitDB.bodies),
+                        eyes: commonTraits.eyes || r(TraitDB.eyes),
+                        accessory: commonTraits.accessory || r(TraitDB.accessories)
+                    };
+                    const key = Object.values(t).join('|');
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        this.creatures.push({ ...t, id: this.creatures.length+1, eliminated: false });
                     }
                 }
             },
 
-            // Visual guide for new players
             triggerHelpBlink() {
                 const btn = document.getElementById('mainHelpBtn');
-                if (!btn) return;
-                btn.classList.add('help-blink-active');
-                setTimeout(() => {
-                    btn.classList.remove('help-blink-active');
-                }, 2000);
+                if (btn) { btn.classList.add('help-blink-active'); setTimeout(() => btn.classList.remove('help-blink-active'), 2000); }
             },
 
             async runCountdown() {
@@ -604,30 +598,19 @@
                     const overlay = document.getElementById('countdown-overlay');
                     const numEl = document.getElementById('countdown-number');
                     const textEl = document.getElementById('countdown-round-text');
-                    
-                    textEl.textContent = `סיבוב ${this.round} מתחילים!`;
+                    textEl.textContent = `הוא חמק שוב! מחפשים...`;
                     overlay.classList.add('active');
-                    
                     let count = 3;
                     numEl.textContent = count;
                     AudioEngine.tick();
-
                     const timer = setInterval(() => {
                         count--;
-                        if (count > 0) {
-                            numEl.textContent = count;
-                            AudioEngine.tick();
-                            numEl.style.animation = 'none';
-                            numEl.offsetHeight; 
-                            numEl.style.animation = null;
-                        } else {
+                        if (count > 0) { numEl.textContent = count; AudioEngine.tick(); }
+                        else {
                             clearInterval(timer);
                             numEl.textContent = "קדימה!";
                             AudioEngine.go();
-                            setTimeout(() => {
-                                overlay.classList.remove('active');
-                                resolve();
-                            }, 800);
+                            setTimeout(() => { overlay.classList.remove('active'); resolve(); }, 800);
                         }
                     }, 1000);
                 });
@@ -636,29 +619,16 @@
             resetStats() { AudioEngine.click(); this.init(true); },
 
             updateStatsUI() {
-                const winsEl = document.getElementById('wins-val');
                 const roundsEl = document.getElementById('rounds-val');
-                if (winsEl) winsEl.textContent = this.score;
                 if (roundsEl) roundsEl.textContent = this.round;
-            },
-
-            generate(n) {
-                this.creatures = []; const seen = new Set(); const r = (a) => a[Math.floor(Math.random()*a.length)].id;
-                while(this.creatures.length < n) {
-                    const t = { color: r(TraitDB.colors), body: r(TraitDB.bodies), eyes: r(TraitDB.eyes), accessory: r(TraitDB.accessories) };
-                    const key = Object.values(t).join('|');
-                    if (!seen.has(key)) { seen.add(key); this.creatures.push({ ...t, id: this.creatures.length+1, eliminated: false }); }
-                }
             },
 
             resetUI() {
                 ['modal', 'help-modal', 'questionSheet', 'sheetOverlay'].forEach(id => {
                     const el = document.getElementById(id); if (el) el.classList.remove('open');
-                    if (id === 'sheetOverlay' && el) el.style.display = 'none';
                 });
                 const log = document.getElementById('questionLog'); if(log) log.innerHTML = '';
                 const btn = document.getElementById('btn-accuse'); if(btn) { btn.classList.remove('active'); btn.textContent = '🎯 ניחוש'; }
-                const label = document.getElementById('log-label'); if(label) label.textContent = 'היסטוריה (0)';
             },
 
             renderCoins() {
@@ -672,9 +642,7 @@
                 this.creatures.forEach(c => {
                     const card = document.createElement('div');
                     card.className = `mini-card${c.eliminated ? ' eliminated' : ''}${this.mode && !c.eliminated ? ' accuse-target' : ''}`;
-                    card.onclick = () => {
-                        if (this.mode) { if(!c.eliminated) this.accuse(c.id); } else { this.toggle(c.id); }
-                    };
+                    card.onclick = () => { if (this.mode) { if(!c.eliminated) this.accuse(c.id); } else { this.toggle(c.id); } };
                     card.innerHTML = `<div class="mini-svg-stage">${SVGCreator.generate(c)}</div>`;
                     g.appendChild(card);
                 });
@@ -703,9 +671,7 @@
                     const others = allVals.filter(v => v !== secretVal);
                     return !others.every(v => this.asked.has(`${catKey}-${v}`));
                 });
-
                 if (eligibleCategories.length === 0) { this.toast("הכל כבר ידוע!", "error", "לא נשארו רמזים"); return; }
-
                 this.coins--; this.renderCoins(); AudioEngine.magic();
                 const randomCat = eligibleCategories[Math.floor(Math.random() * eligibleCategories.length)];
                 const valId = secret[randomCat];
@@ -733,11 +699,18 @@
             },
 
             accuse(id) {
-                const winMsgs = ["אלופי הבלשים! 🏆", "בול בפוני! ⭐", "שיחקתם אותה בענק! 🔥", "היצור נמצא, אתם תותחים! 🎯"];
-                const lossMsgs = ["הוא חמק הפעם! 💨", "כמעט הצלחתם, מנסים שוב? 🕵️", "לא נורא, הסיבוב הבא שלכם! 🚀", "הפעם היצור היה מהיר יותר! 🌀"];
-                if (id === this.secretId) { this.score++; AudioEngine.success(); this.showModal(winMsgs[Math.floor(Math.random()*winMsgs.length)], 'מצאתם את היצור הסודי והוא נורא שמח!', 'var(--green-500)'); }
-                else { AudioEngine.error(); this.showModal(lossMsgs[Math.floor(Math.random()*lossMsgs.length)], 'היצור הסודי הצליח להתחבא הפעם. ממשיכים לחפש?', 'var(--red-500)'); }
-                this.round++; this.updateStatsUI();
+                const winMsgs = ["מצאתם אותו! 🏆", "בול בפוני! ⭐", "כל הכבוד, היצור אותר! 🔥", "קליעה בול! אתם אלופים! 🎯"];
+                const lossMsgs = ["אוף, הוא חמק לגמרי! 💨", "המרדף הסתיים הפעם... 🕵️", "הוא הצליח לברוח! 🚀", "פספוס! בואו נתחיל מחדש 🏁"];
+                const actionBtn = document.getElementById('modal-action-btn');
+                if (id === this.secretId) { 
+                    this.round++; AudioEngine.success(); 
+                    this.showModal(winMsgs[Math.floor(Math.random()*winMsgs.length)], `מצאתם אותו! אבל הוא הצליח לחמוק שוב... מוכנים להמשיך לרדוף אחריו?`, 'var(--green-500)'); 
+                    actionBtn.onclick = () => GameLogic.init(false);
+                } else { 
+                    AudioEngine.error(); 
+                    this.showModal(lossMsgs[Math.floor(Math.random()*lossMsgs.length)], `הוא היה מהיר מדי. הגעתם לסיבוב ${this.round}. חוזרים לסיבוב 1 למרדף חדש!`, 'var(--red-500)'); 
+                    actionBtn.onclick = () => GameLogic.init(true);
+                }
             },
 
             showModal(t, m, c) { const title = document.getElementById('modal-title'); if(title) { title.textContent = t; title.style.color = c; } document.getElementById('modal-message').textContent = m; document.getElementById('modal').classList.add('open'); },
@@ -768,7 +741,7 @@
         function openSheet() { AudioEngine.click(); GameLogic.renderCategoryTabs(); GameLogic.renderTraitChips(); if(document.getElementById('sheetOverlay')) document.getElementById('sheetOverlay').style.display = 'block'; if(document.getElementById('questionSheet')) document.getElementById('questionSheet').classList.add('open'); }
         function closeSheet() { if(document.getElementById('sheetOverlay')) document.getElementById('sheetOverlay').style.display = 'none'; if(document.getElementById('questionSheet')) document.getElementById('questionSheet').classList.remove('open'); }
 
-        window.addEventListener('DOMContentLoaded', () => GameLogic.init());
+        window.addEventListener('DOMContentLoaded', () => GameLogic.init(true));
     </script>
 </body>
 
