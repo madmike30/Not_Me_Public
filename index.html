@@ -316,11 +316,9 @@
                 svg += `<path d="M 55 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
                 
                 if (isTriangle) {
-                    // ידיים מופנות יותר לצדדים
                     svg += `<path d="M 32 60 Q 12 62 14 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
                     svg += `<path d="M 68 60 Q 88 62 86 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
                 } else {
-                    // ידיים רגילות לשאר הצורות
                     svg += `<path d="M 20 60 Q 5 60 15 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
                     svg += `<path d="M 80 60 Q 95 60 85 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
                 }
@@ -333,10 +331,8 @@
                     svg += `<rect x="20" y="25" width="60" height="60" rx="15" fill="url(#${gradId})" />`;
                 }
 
-                // הפחתת מיקום הפנים עבור המשולש כדי להעלות את העיניים
                 const faceOffsetY = isTriangle ? 4 : 0; 
                 
-                // קירוב עיניים בגרסת המשולש
                 let leftEyeX = 32;
                 let rightEyeX = 68;
                 if (isTriangle) {
@@ -347,18 +343,15 @@
                 const blushY = 60 + faceOffsetY;
                 
                 if (isOneEye) {
-                    // קירוב גומות חן למרכז
                     svg += `<ellipse cx="32" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
                     svg += `<ellipse cx="68" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
                 } else {
-                    // גומות חן קרובות יותר ופרופורציונליות למיקום העיניים
                     svg += `<ellipse cx="${leftEyeX - 6}" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
                     svg += `<ellipse cx="${rightEyeX + 6}" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
                 }
 
                 const mouthY = 70 + faceOffsetY;
                 if (isTriangle) {
-                    // פה קטן וחמוד במיוחד למשולש
                     svg += `<path d="M 47 ${mouthY} Q 50 ${mouthY + 4} 53 ${mouthY}" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>`;
                 } else {
                     svg += `<path d="M 45 ${mouthY} Q 50 ${mouthY + 5} 55 ${mouthY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
@@ -407,9 +400,14 @@
                     svg += `<path d="M 55 ${topY - 15} Q 60 ${topY - 10} 50 ${topY - 5} Z" fill="#22c55e" stroke="#15803d" stroke-width="1"/>`;
                     svg += `<path d="M 50 ${topY - 5} Q 40 ${topY - 10} 45 ${topY - 15} Z" fill="#4ade80" stroke="#15803d" stroke-width="1"/>`;
                 } else if (acc === 'hair') {
-                    const headTopY = isTriangle ? 20 : (isRound ? 23 : 25);
-                    // הוחלף לצבע זהוב בהיר עם קונטרסט גבוה מול הרקע הכהה
-                    svg += `<path d="M 38 ${headTopY + 3} Q 42 ${headTopY - 12} 46 ${headTopY - 1} Q 50 ${headTopY - 16} 54 ${headTopY - 1} Q 58 ${headTopY - 12} 62 ${headTopY + 3} Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" stroke-linejoin="round"/>`;
+                    if (isTriangle) {
+                        // עיצוב שיער המותאם ייעודית לקודקוד המשולש ומונע ציפה
+                        svg += `<path d="M 44 26 Q 47 8 50 15 Q 54 5 57 24 Q 50 20 44 26 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" stroke-linejoin="round"/>`;
+                    } else {
+                        // בלורית קוצנית במרכז הראש למבנה עגלגל ומרובע
+                        const headTopY = isRound ? 23 : 25;
+                        svg += `<path d="M 40 ${headTopY+2} Q 44 ${headTopY-12} 47 ${headTopY-1} Q 50 ${headTopY-18} 53 ${headTopY-1} Q 56 ${headTopY-10} 60 ${headTopY+2} Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" stroke-linejoin="round"/>`;
+                    }
                 }
 
                 svg += `</svg>`;
