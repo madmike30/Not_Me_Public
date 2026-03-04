@@ -72,11 +72,28 @@
             min-width: 0;
         }
 
+        .game-title-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            min-width: 0;
+        }
+
         .game-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 900;
             color: var(--indigo-400);
-            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .game-subtitle {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: var(--slate-400);
+            border-right: 1px solid var(--slate-600);
+            padding-right: 6px;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -95,6 +112,17 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Help button attention seeker */
+        @keyframes pulse-help {
+            0%, 100% { transform: scale(1); background-color: var(--slate-700); }
+            50% { transform: scale(1.25); background-color: var(--indigo-600); box-shadow: 0 0 15px var(--indigo-500); }
+        }
+
+        .help-blink-active {
+            animation: pulse-help 0.5s ease-in-out infinite;
         }
 
         .header-progress-pill {
@@ -157,18 +185,6 @@
             padding: 10px;
             display: flex;
             flex-direction: column;
-        }
-
-        .onboarding-hint {
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px dashed var(--indigo-500);
-            color: var(--indigo-300);
-            text-align: center;
-            padding: 6px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-bottom: 8px;
         }
 
         .creature-grid {
@@ -283,12 +299,12 @@
 
         .action-btn:active { transform: scale(0.96); }
 
-        .btn-ask { background: var(--indigo-600); color: white; }
+        .btn-ask { background: var(--indigo-600); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
         .btn-hint { background: var(--slate-700); color: var(--yellow-500); border: 1px solid rgba(234, 179, 8, 0.2); }
         .btn-accuse { background: var(--slate-700); color: var(--red-500); border: 1px solid rgba(239, 68, 68, 0.2); }
-        .btn-accuse.active { background: var(--red-500); color: white; }
+        .btn-accuse.active { background: var(--red-500); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
 
-        /* --- Bottom Sheet & Categories Fix --- */
+        /* --- Bottom Sheet --- */
         .bottom-sheet {
             position: fixed;
             bottom: 0;
@@ -312,13 +328,9 @@
             display: flex;
             gap: 8px;
             overflow-x: auto;
-            padding: 4px 4px 16px 4px;
+            padding-bottom: 15px;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            flex-wrap: nowrap;
         }
-
-        .category-tabs::-webkit-scrollbar { display: none; }
 
         .category-tab {
             padding: 10px 18px;
@@ -393,11 +405,14 @@
 
     <header class="top-bar">
         <div class="top-bar-right">
-            <button class="help-btn" onclick="GameLogic.showHelp()">?</button>
-            <span class="game-title">היצור הסודי מתחבא! מצאו אותו!</span>
+            <button class="help-btn" id="mainHelpBtn" onclick="GameLogic.showHelp()">?</button>
+            <div class="game-title-group">
+                <span class="game-title">היצור הסודי</span>
+                <span class="game-subtitle">מתחבא! מצאו אותו!</span>
+            </div>
         </div>
         
-        <!-- Progress System Badge: Updated Order & Modern Icon -->
+        <!-- Progress System Badge -->
         <div class="header-progress-pill">
             <div class="stat-badge" title="סיבוב נוכחי">
                 <span class="stat-label-text">סיבוב</span>
@@ -405,7 +420,6 @@
             </div>
             <div class="stat-divider"></div>
             <div class="stat-badge" title="ניצחונות">
-                <!-- Minimalist Vector Trophy Icon -->
                 <svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--yellow-500)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                     <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
@@ -425,7 +439,6 @@
     </header>
 
     <div class="grid-area">
-        <div class="onboarding-hint" id="onboardingHint">💡 טיפ: געו ביצור שלא מתאים כדי לפסול אותו</div>
         <div class="creature-grid" id="creatures-grid"></div>
     </div>
 
@@ -451,7 +464,7 @@
         <div class="modal-box">
             <h2 class="modal-title" id="modal-title"></h2>
             <p id="modal-message" style="color: var(--slate-300); margin-bottom: 20px; font-size: 1.1rem;"></p>
-            <button class="modal-btn" onclick="GameLogic.init()">סיבוב חדש!</button>
+            <button class="modal-btn" onclick="GameLogic.init()">סיבוב נוסף!</button>
         </div>
     </div>
 
@@ -546,17 +559,18 @@
         };
 
         const GameLogic = {
-            creatures: [], secretId: null, coins: 2, asked: new Set(), cat: 'color', mode: false, count: 0, first: false,
+            creatures: [], secretId: null, coins: 2, asked: new Set(), cat: 'color', mode: false, count: 0,
             score: 0, round: 1,
 
             init(isResetStats = false) {
                 if (isResetStats) { this.score = 0; this.round = 1; }
-                this.coins = 2; this.asked.clear(); this.mode = false; this.count = 0; this.first = false;
+                this.coins = 2; this.asked.clear(); this.mode = false; this.count = 0;
                 this.generate(9);
                 this.secretId = this.creatures[Math.floor(Math.random()*9)].id;
                 
                 this.resetUI();
                 
+                // Show countdown for round 2 and up
                 if (this.round > 1 && !isResetStats) {
                     this.runCountdown().then(() => {
                         this.renderGrid();
@@ -564,12 +578,25 @@
                         this.updateStatsUI();
                     });
                 } else {
+                    // Round 1 specific behavior: Blinking Help Button
                     this.renderGrid();
                     this.renderCoins();
                     this.updateStatsUI();
+                    
+                    if (this.round === 1) {
+                        this.triggerHelpBlink();
+                    }
                 }
+            },
 
-                const h = document.getElementById('onboardingHint'); if(h) h.style.display = 'block';
+            // Visual guide for new players
+            triggerHelpBlink() {
+                const btn = document.getElementById('mainHelpBtn');
+                if (!btn) return;
+                btn.classList.add('help-blink-active');
+                setTimeout(() => {
+                    btn.classList.remove('help-blink-active');
+                }, 2000);
             },
 
             async runCountdown() {
@@ -646,7 +673,6 @@
                     const card = document.createElement('div');
                     card.className = `mini-card${c.eliminated ? ' eliminated' : ''}${this.mode && !c.eliminated ? ' accuse-target' : ''}`;
                     card.onclick = () => {
-                        this.triggerAction();
                         if (this.mode) { if(!c.eliminated) this.accuse(c.id); } else { this.toggle(c.id); }
                     };
                     card.innerHTML = `<div class="mini-svg-stage">${SVGCreator.generate(c)}</div>`;
@@ -654,7 +680,6 @@
                 });
             },
 
-            triggerAction() { if(!this.first) { this.first = true; const h = document.getElementById('onboardingHint'); if(h) h.style.display = 'none'; } },
             toggle(id) { AudioEngine.eliminate(); const c = this.creatures.find(x => x.id === id); if(c) { c.eliminated = !c.eliminated; this.renderGrid(); } },
             toggleAccuseMode() { AudioEngine.click(); this.mode = !this.mode; const b = document.getElementById('btn-accuse'); if(b) { b.classList.toggle('active', this.mode); b.textContent = this.mode ? '❌ ביטול' : '🎯 ניחוש'; } this.renderGrid(); },
             
@@ -710,14 +735,8 @@
             accuse(id) {
                 const winMsgs = ["אלופי הבלשים! 🏆", "בול בפוני! ⭐", "שיחקתם אותה בענק! 🔥", "היצור נמצא, אתם תותחים! 🎯"];
                 const lossMsgs = ["הוא חמק הפעם! 💨", "כמעט הצלחתם, מנסים שוב? 🕵️", "לא נורא, הסיבוב הבא שלכם! 🚀", "הפעם היצור היה מהיר יותר! 🌀"];
-                
-                if (id === this.secretId) { 
-                    this.score++; AudioEngine.success(); 
-                    this.showModal(winMsgs[Math.floor(Math.random()*winMsgs.length)], 'מצאתם את היצור הסודי והוא נורא שמח!', 'var(--green-500)'); 
-                } else { 
-                    AudioEngine.error(); 
-                    this.showModal(lossMsgs[Math.floor(Math.random()*lossMsgs.length)], 'היצור הסודי הצליח להתחבא הפעם. ממשיכים לחפש?', 'var(--red-500)'); 
-                }
+                if (id === this.secretId) { this.score++; AudioEngine.success(); this.showModal(winMsgs[Math.floor(Math.random()*winMsgs.length)], 'מצאתם את היצור הסודי והוא נורא שמח!', 'var(--green-500)'); }
+                else { AudioEngine.error(); this.showModal(lossMsgs[Math.floor(Math.random()*lossMsgs.length)], 'היצור הסודי הצליח להתחבא הפעם. ממשיכים לחפש?', 'var(--red-500)'); }
                 this.round++; this.updateStatsUI();
             },
 
