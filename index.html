@@ -168,7 +168,7 @@
             <div class="space-y-4 text-slate-300 text-sm md:text-base leading-relaxed">
                 <p><strong class="text-white">המטרה:</strong> גלו מי הוא היצור הסודי מבין כל היצורים על המסך.</p>
                 <ul class="list-disc list-inside space-y-2">
-                    <li><strong class="text-white">שאלו שאלות:</strong> בחרו קטגוריה ומאפיין (למשל: האם הצבע אדום?) כדי לסנן חשודים.</li>
+                    <li><strong class="text-white">שאלו שאלות:</strong> בחרו קטגוריה ומאפיין (למשל: האם הצבע אדום?) כדי לסנן חשודים. לא ניתן לשאול את אותה שאלה פעמיים.</li>
                     <li><strong class="text-white">פסלו דמויות:</strong> השתמשו בכפתור "פסול" מתחת לכל יצור כדי להחשיך אותו אם הוא לא מתאים.</li>
                     <li><strong class="text-white">מטבעות זהב:</strong> נצלו אותם לרכישת רמזים סודיים שיעזרו לכם להתמקד בחיפוש.</li>
                     <li><strong class="text-white">האשמה:</strong> בטוחים שמצאתם? לחצו על "זה הוא!". טעות אחת והמשחק נגמר באופן מיידי.</li>
@@ -251,7 +251,7 @@
         document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
 
         /**
-         * מסד נתונים מזוקק
+         * מסד נתונים מזוקק למאפיינים ויזואליים בלבד
          */
         const TraitDB = {
             colors: [
@@ -261,8 +261,9 @@
                 { id: 'purple', name: 'סגול', hex: '#a855f7', dark: '#7e22ce' }
             ],
             bodies: [
-                { id: 'chubby', name: 'שמנמן' },
-                { id: 'boxy', name: 'קופסתי' }
+                { id: 'round', name: 'עגלגל' },
+                { id: 'boxy', name: 'מרובע' },
+                { id: 'triangle', name: 'משולש' }
             ],
             eyes: [
                 { id: '1', name: 'עין אחת' },
@@ -272,17 +273,8 @@
                 { id: 'glasses', name: 'משקפיים' },
                 { id: 'bowtie', name: 'פפיון' },
                 { id: 'sprout', name: 'נבט בראש' },
+                { id: 'hair', name: 'שיער' },
                 { id: 'none', name: 'ללא תוספות' }
-            ],
-            characters: [
-                { id: 'brave', name: 'אמיץ', icon: '🦁' },
-                { id: 'shy', name: 'ביישן', icon: '🫣' },
-                { id: 'funny', name: 'מצחיק', icon: '🤡' }
-            ],
-            hobbies: [
-                { id: 'food', name: 'אוהב לאכול', icon: '🍔' },
-                { id: 'sleep', name: 'אוהב לישון', icon: '💤' },
-                { id: 'play', name: 'אוהב לשחק', icon: '🎮' }
             ]
         };
 
@@ -290,9 +282,7 @@
             color: { name: 'צבע', db: TraitDB.colors },
             body: { name: 'מבנה גוף', db: TraitDB.bodies },
             eyes: { name: 'מספר עיניים', db: TraitDB.eyes },
-            accessory: { name: 'תוספות', db: TraitDB.accessories },
-            character: { name: 'אופי', db: TraitDB.characters },
-            hobby: { name: 'תחביב', db: TraitDB.hobbies }
+            accessory: { name: 'תוספות', db: TraitDB.accessories }
         };
 
         /**
@@ -301,7 +291,8 @@
         const SVGCreator = {
             generate(creature) {
                 const colorObj = TraitDB.colors.find(c => c.id === creature.color);
-                const isChubby = creature.body === 'chubby';
+                const isRound = creature.body === 'round';
+                const isTriangle = creature.body === 'triangle';
                 const isOneEye = creature.eyes === '1';
                 const acc = creature.accessory;
                 
@@ -323,27 +314,57 @@
                 svg += `<ellipse cx="50" cy="90" rx="30" ry="6" fill="rgba(0,0,0,0.3)" class="animate-shadow" style="animation-delay: ${floatDelay}s" />`;
                 svg += `<path d="M 35 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
                 svg += `<path d="M 55 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
-                svg += `<path d="M 20 60 Q 5 60 15 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
-                svg += `<path d="M 80 60 Q 95 60 85 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                
+                if (isTriangle) {
+                    // ידיים מופנות יותר לצדדים
+                    svg += `<path d="M 32 60 Q 12 62 14 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                    svg += `<path d="M 68 60 Q 88 62 86 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                } else {
+                    // ידיים רגילות לשאר הצורות
+                    svg += `<path d="M 20 60 Q 5 60 15 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                    svg += `<path d="M 80 60 Q 95 60 85 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                }
 
-                if (isChubby) {
+                if (isRound) {
                     svg += `<ellipse cx="50" cy="55" rx="35" ry="32" fill="url(#${gradId})" />`;
+                } else if (isTriangle) {
+                    svg += `<path d="M 50 20 Q 55 20 58 26 L 83 76 Q 86 82 80 85 L 20 85 Q 14 82 17 76 L 42 26 Q 45 20 50 20 Z" fill="url(#${gradId})" />`;
                 } else {
                     svg += `<rect x="20" y="25" width="60" height="60" rx="15" fill="url(#${gradId})" />`;
                 }
 
-                const blushY = 60;
-                if (isOneEye) {
-                    svg += `<ellipse cx="25" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
-                    svg += `<ellipse cx="75" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
-                } else {
-                    svg += `<ellipse cx="20" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
-                    svg += `<ellipse cx="80" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                // הפחתת מיקום הפנים עבור המשולש כדי להעלות את העיניים
+                const faceOffsetY = isTriangle ? 4 : 0; 
+                
+                // קירוב עיניים בגרסת המשולש
+                let leftEyeX = 32;
+                let rightEyeX = 68;
+                if (isTriangle) {
+                    leftEyeX = 36;
+                    rightEyeX = 64;
                 }
 
-                svg += `<path d="M 45 70 Q 50 75 55 70" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
+                const blushY = 60 + faceOffsetY;
+                
+                if (isOneEye) {
+                    // קירוב גומות חן למרכז
+                    svg += `<ellipse cx="32" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    svg += `<ellipse cx="68" cy="${blushY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                } else {
+                    // גומות חן קרובות יותר ופרופורציונליות למיקום העיניים
+                    svg += `<ellipse cx="${leftEyeX - 6}" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    svg += `<ellipse cx="${rightEyeX + 6}" cy="${blushY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                }
 
-                const eyeY = 48;
+                const mouthY = 70 + faceOffsetY;
+                if (isTriangle) {
+                    // פה קטן וחמוד במיוחד למשולש
+                    svg += `<path d="M 47 ${mouthY} Q 50 ${mouthY + 4} 53 ${mouthY}" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>`;
+                } else {
+                    svg += `<path d="M 45 ${mouthY} Q 50 ${mouthY + 5} 55 ${mouthY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
+                }
+
+                const eyeY = 48 + faceOffsetY;
                 if (isOneEye) {
                     svg += `
                     <g class="animate-blink" style="transform-origin: 50px ${eyeY}px; animation-delay: ${blinkDelay}s">
@@ -353,15 +374,15 @@
                     </g>`;
                 } else {
                     svg += `
-                    <g class="animate-blink" style="transform-origin: 32px ${eyeY}px; animation-delay: ${blinkDelay}s">
-                        <circle cx="32" cy="${eyeY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/>
-                        <circle cx="32" cy="${eyeY}" r="4" fill="#0f172a"/>
-                        <circle cx="31" cy="${eyeY - 1}" r="1.5" fill="white"/>
+                    <g class="animate-blink" style="transform-origin: ${leftEyeX}px ${eyeY}px; animation-delay: ${blinkDelay}s">
+                        <circle cx="${leftEyeX}" cy="${eyeY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/>
+                        <circle cx="${leftEyeX}" cy="${eyeY}" r="4" fill="#0f172a"/>
+                        <circle cx="${leftEyeX - 1}" cy="${eyeY - 1}" r="1.5" fill="white"/>
                     </g>
-                    <g class="animate-blink" style="transform-origin: 68px ${eyeY}px; animation-delay: ${blinkDelay}s">
-                        <circle cx="68" cy="${eyeY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/>
-                        <circle cx="68" cy="${eyeY}" r="4" fill="#0f172a"/>
-                        <circle cx="67" cy="${eyeY - 1}" r="1.5" fill="white"/>
+                    <g class="animate-blink" style="transform-origin: ${rightEyeX}px ${eyeY}px; animation-delay: ${blinkDelay}s">
+                        <circle cx="${rightEyeX}" cy="${eyeY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/>
+                        <circle cx="${rightEyeX}" cy="${eyeY}" r="4" fill="#0f172a"/>
+                        <circle cx="${rightEyeX - 1}" cy="${eyeY - 1}" r="1.5" fill="white"/>
                     </g>`;
                 }
 
@@ -371,20 +392,24 @@
                         svg += `<line x1="15" y1="${eyeY}" x2="32" y2="${eyeY}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>`;
                         svg += `<line x1="68" y1="${eyeY}" x2="85" y2="${eyeY}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>`;
                     } else {
-                        svg += `<circle cx="32" cy="${eyeY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/>`;
-                        svg += `<circle cx="68" cy="${eyeY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/>`;
-                        svg += `<line x1="46" y1="${eyeY}" x2="54" y2="${eyeY}" stroke="#1e293b" stroke-width="3"/>`;
+                        svg += `<circle cx="${leftEyeX}" cy="${eyeY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/>`;
+                        svg += `<circle cx="${rightEyeX}" cy="${eyeY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/>`;
+                        svg += `<line x1="${leftEyeX + 14}" y1="${eyeY}" x2="${rightEyeX - 14}" y2="${eyeY}" stroke="#1e293b" stroke-width="3"/>`;
                     }
                 } else if (acc === 'bowtie') {
-                    const btY = isChubby ? 82 : 80;
+                    const btY = isTriangle ? 80 : 82;
                     svg += `<polygon points="50,${btY} 40,${btY - 5} 40,${btY + 5}" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>`;
                     svg += `<polygon points="50,${btY} 60,${btY - 5} 60,${btY + 5}" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>`;
                     svg += `<circle cx="50" cy="${btY}" r="3" fill="#fca5a5" stroke="#7f1d1d" stroke-width="1"/>`;
                 } else if (acc === 'sprout') {
-                    const topY = isChubby ? 23 : 25;
+                    const topY = isTriangle ? 20 : (isRound ? 23 : 25);
                     svg += `<path d="M 50 ${topY} Q 45 ${topY - 10} 55 ${topY - 15}" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round"/>`;
                     svg += `<path d="M 55 ${topY - 15} Q 60 ${topY - 10} 50 ${topY - 5} Z" fill="#22c55e" stroke="#15803d" stroke-width="1"/>`;
                     svg += `<path d="M 50 ${topY - 5} Q 40 ${topY - 10} 45 ${topY - 15} Z" fill="#4ade80" stroke="#15803d" stroke-width="1"/>`;
+                } else if (acc === 'hair') {
+                    const headTopY = isTriangle ? 20 : (isRound ? 23 : 25);
+                    // הוחלף לצבע זהוב בהיר עם קונטרסט גבוה מול הרקע הכהה
+                    svg += `<path d="M 38 ${headTopY + 3} Q 42 ${headTopY - 12} 46 ${headTopY - 1} Q 50 ${headTopY - 16} 54 ${headTopY - 1} Q 58 ${headTopY - 12} 62 ${headTopY + 3} Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" stroke-linejoin="round"/>`;
                 }
 
                 svg += `</svg>`;
@@ -399,6 +424,7 @@
             creatures: [],
             secretCreatureId: null,
             coins: 2,
+            askedQuestions: new Set(),
             
             els: {
                 grid: document.getElementById('creatures-grid'),
@@ -414,6 +440,7 @@
 
             init() {
                 this.coins = 2;
+                this.askedQuestions.clear();
                 this.generateCreatures(10); 
                 
                 const randomIndex = Math.floor(Math.random() * this.creatures.length);
@@ -439,8 +466,6 @@
                         body: this.getRandomTrait(TraitDB.bodies),
                         eyes: this.getRandomTrait(TraitDB.eyes),
                         accessory: this.getRandomTrait(TraitDB.accessories),
-                        character: this.getRandomTrait(TraitDB.characters),
-                        hobby: this.getRandomTrait(TraitDB.hobbies),
                         eliminated: false
                     };
                     this.creatures.push(creature);
@@ -454,6 +479,7 @@
                 this.els.historyList.appendChild(this.els.noHistoryMsg);
                 this.els.noHistoryMsg.style.display = 'block';
                 this.updateButtonsState();
+                this.updateAskButtonState();
             },
 
             renderCoins() {
@@ -471,17 +497,29 @@
                 const canBuy = this.coins > 0;
                 this.els.btnHint.disabled = !canBuy;
                 
-                [this.els.btnHint].forEach(btn => {
-                    if (btn.disabled) {
-                        btn.classList.add('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    }
-                });
+                if (this.els.btnHint.disabled) {
+                    this.els.btnHint.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    this.els.btnHint.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            },
 
-                this.els.btnAsk.innerHTML = `<span>❓</span> שאל שאלה`;
-                this.els.btnAsk.classList.replace('bg-purple-600', 'bg-indigo-600');
-                this.els.btnAsk.classList.replace('hover:bg-purple-500', 'hover:bg-indigo-500');
+            updateAskButtonState() {
+                const category = this.els.catSelect.value;
+                const value = this.els.valSelect.value;
+                const isAsked = this.askedQuestions.has(`${category}-${value}`);
+                
+                if (isAsked) {
+                    this.els.btnAsk.disabled = true;
+                    this.els.btnAsk.innerHTML = `<span>✔️</span> נשאל כבר`;
+                    this.els.btnAsk.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-600', 'hover:bg-slate-600');
+                    this.els.btnAsk.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+                } else {
+                    this.els.btnAsk.disabled = false;
+                    this.els.btnAsk.innerHTML = `<span>❓</span> שאל שאלה`;
+                    this.els.btnAsk.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-600', 'hover:bg-slate-600');
+                    this.els.btnAsk.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+                }
             },
 
             populateDropdowns() {
@@ -497,6 +535,11 @@
                     AudioEngine.playClick();
                     this.updateValueDropdown();
                 });
+                
+                this.els.valSelect.addEventListener('change', () => {
+                    this.updateAskButtonState();
+                });
+
                 this.updateValueDropdown();
             },
 
@@ -511,6 +554,8 @@
                     option.textContent = item.name + (item.icon ? ` ${item.icon}` : '');
                     this.els.valSelect.appendChild(option);
                 });
+                
+                this.updateAskButtonState();
             },
 
             renderGrid() {
@@ -521,20 +566,12 @@
                     card.className = `creature-card bg-slate-800 border border-slate-700 rounded-xl p-3 flex flex-col items-center shadow-lg ${creature.eliminated ? 'eliminated' : 'hover:border-indigo-500 hover:shadow-indigo-500/20'}`;
                     
                     const svgMarkup = SVGCreator.generate(creature);
-                    
-                    const charObj = TraitDB.characters.find(c => c.id === creature.character);
-                    const hobbyObj = TraitDB.hobbies.find(c => c.id === creature.hobby);
 
                     card.innerHTML = `
                         <div class="creature-svg-wrapper mb-3 flex justify-center items-center h-24 sm:h-32 w-full bg-slate-900/50 rounded-xl border border-slate-700 shadow-inner">
                             ${svgMarkup}
                         </div>
                         
-                        <div class="flex flex-wrap gap-1 w-full justify-center mb-3">
-                            <span class="bg-slate-700 rounded-md py-1 px-2 text-sm flex items-center gap-1 shadow-sm" title="אופי: ${charObj.name}">${charObj.icon} <span class="text-[10px] font-bold text-slate-300">${charObj.name}</span></span>
-                            <span class="bg-slate-700 rounded-md py-1 px-2 text-sm flex items-center gap-1 shadow-sm" title="תחביב: ${hobbyObj.name}">${hobbyObj.icon} <span class="text-[10px] font-bold text-slate-300">${hobbyObj.name}</span></span>
-                        </div>
-
                         <div class="flex gap-1 w-full mt-auto">
                             <button onclick="GameLogic.toggleEliminate(${creature.id})" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg font-medium transition-colors text-xs border border-slate-600 touch-manipulation">
                                 ${creature.eliminated ? 'החזר' : 'פסול'}
@@ -550,14 +587,23 @@
             },
 
             askQuestion() {
-                AudioEngine.playClick();
                 const category = this.els.catSelect.value;
                 const value = this.els.valSelect.value;
+                const questionKey = `${category}-${value}`;
+                
+                if (this.askedQuestions.has(questionKey)) {
+                    AudioEngine.playError();
+                    return;
+                }
+
+                AudioEngine.playClick();
+                this.askedQuestions.add(questionKey);
                 
                 const catName = CategoryMap[category].name;
                 const valName = this.els.valSelect.options[this.els.valSelect.selectedIndex].text;
                 
                 this.processQuestion(category, value, catName, valName);
+                this.updateAskButtonState();
             },
 
             processQuestion(category, value, catName, valName) {
@@ -602,9 +648,21 @@
 
                 const secret = this.creatures.find(c => c.id === this.secretCreatureId);
                 
+                // חיפוש רמז שטרם התגלה (או נשאל)
                 const hintCategories = Object.keys(CategoryMap);
-                const randomCat = hintCategories[Math.floor(Math.random() * hintCategories.length)];
-                const traitValue = secret[randomCat];
+                let randomCat = '';
+                let traitValue = '';
+                let attempts = 0;
+                
+                do {
+                    randomCat = hintCategories[Math.floor(Math.random() * hintCategories.length)];
+                    traitValue = secret[randomCat];
+                    attempts++;
+                } while (this.askedQuestions.has(`${randomCat}-${traitValue}`) && attempts < 20);
+
+                // סימון הרמז כשאלה שנשאלה כדי למנוע כפילויות בהמשך
+                this.askedQuestions.add(`${randomCat}-${traitValue}`);
+                this.updateAskButtonState();
                 
                 const catName = CategoryMap[randomCat].name;
                 const valObj = CategoryMap[randomCat].db.find(item => item.id === traitValue);
