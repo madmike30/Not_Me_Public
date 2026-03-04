@@ -6,23 +6,17 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-    <!-- הגדרות PWA לאייפון -->
+    <!-- PWA Settings for iPhone/iPad -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="היצור הסודי">
 
-    <title>היצור הסודי</title>
+    <title>היצור הסודי מתחבא! מצאו אותו!</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
             --slate-900: #0f172a;
@@ -39,11 +33,8 @@
             --red-500: #ef4444;
             --green-500: #22c55e;
             --green-600: #16a34a;
-            --green-900-30: rgba(20, 83, 45, 0.3);
-            --red-900-30: rgba(127, 29, 29, 0.3);
             --yellow-500: #eab308;
             --yellow-900-30: rgba(113, 63, 18, 0.3);
-            --purple-500: #a855f7;
         }
 
         body {
@@ -60,53 +51,44 @@
             touch-action: manipulation;
         }
 
-        /* === TOP BAR === */
+        /* --- Header Section Optimized --- */
         .top-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 16px;
+            padding: 8px 12px;
             background: var(--slate-800);
             border-bottom: 1px solid var(--slate-700);
             flex-shrink: 0;
-            z-index: 10;
+            z-index: 20;
+            gap: 12px;
         }
 
         .top-bar-right {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             flex: 1;
+            min-width: 0;
         }
 
         .game-title {
-            font-size: 1.15rem;
+            font-size: 0.95rem;
             font-weight: 900;
             color: var(--indigo-400);
-            display: flex;
-            align-items: center;
-            gap: 8px;
             white-space: nowrap;
-        }
-
-        .game-subtitle {
-            font-size: 0.7rem;
-            font-weight: 400;
-            color: var(--slate-400);
-            border-right: 1px solid var(--slate-600);
-            padding-right: 8px;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .help-btn {
-            width: 34px;
-            height: 34px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            background: var(--indigo-600);
+            background: var(--slate-700);
             color: white;
-            border: 1px solid var(--indigo-400);
-            font-size: 1rem;
+            border: 1px solid var(--slate-600);
+            font-size: 0.9rem;
             font-weight: 900;
             cursor: pointer;
             display: flex;
@@ -115,38 +97,64 @@
             flex-shrink: 0;
         }
 
-        .stat-item {
+        .header-progress-pill {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 2px;
-            margin-right: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            padding: 2px 10px;
+            gap: 8px;
+            height: 34px;
+            flex-shrink: 0;
         }
 
-        .stat-label {
-            font-size: 0.6rem;
-            font-weight: 700;
-            color: var(--slate-500);
-        }
-
-        .stat-value {
-            font-size: 1.1rem;
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
             font-weight: 900;
-            color: var(--slate-100);
+            font-size: 0.85rem;
         }
+
+        .stat-label-text {
+            font-size: 0.65rem;
+            color: var(--slate-500);
+            font-weight: 700;
+        }
+
+        .stat-icon { flex-shrink: 0; }
+        .stat-divider { width: 1px; height: 14px; background: rgba(255, 255, 255, 0.1); }
+
+        .reset-action {
+            background: transparent;
+            border: none;
+            color: var(--slate-500);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.2s;
+            margin-right: 2px;
+        }
+
+        .reset-action:active { transform: rotate(-90deg); color: var(--indigo-400); }
 
         .coins-display {
             display: flex;
-            gap: 3px;
+            gap: 2px;
             font-size: 1.1rem;
+            background: rgba(0,0,0,0.2);
+            padding: 4px 8px;
+            border-radius: 20px;
+            flex-shrink: 0;
         }
 
-        /* === CREATURE GRID === */
+        /* --- Main Grid Area --- */
         .grid-area {
             flex: 1;
             overflow-y: auto;
             padding: 10px;
-            -webkit-overflow-scrolling: touch;
             display: flex;
             flex-direction: column;
         }
@@ -156,30 +164,17 @@
             border: 1px dashed var(--indigo-500);
             color: var(--indigo-300);
             text-align: center;
-            padding: 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
+            padding: 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
             font-weight: 700;
-            margin-bottom: 12px;
-            animation: pulse-border 2s infinite;
-        }
-
-        @keyframes pulse-border {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
+            margin-bottom: 8px;
         }
 
         .creature-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        @media (min-width: 400px) {
-            .creature-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
 
         .mini-card {
@@ -188,8 +183,8 @@
             border-radius: 18px;
             padding: 8px;
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             cursor: pointer;
@@ -197,12 +192,9 @@
             aspect-ratio: 0.85;
         }
 
-        /* מצב פסילה */
         .mini-card.eliminated {
             filter: grayscale(100%);
-            opacity: 0.4;
-            border-color: transparent;
-            transform: scale(0.96);
+            opacity: 0.35;
         }
 
         .mini-card.eliminated::after {
@@ -215,43 +207,27 @@
             color: white;
             font-size: 1.4rem;
             font-weight: 900;
-            padding: 4px 16px;
+            padding: 2px 14px;
             border-radius: 8px;
             z-index: 10;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            pointer-events: none;
-            letter-spacing: 1px;
             border: 2px solid white;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
         .mini-card.accuse-target {
             border-color: var(--red-500);
-            box-shadow: 0 0 16px rgba(239, 68, 68, 0.5);
             animation: target-pulse 0.8s infinite alternate;
         }
 
-        @keyframes target-pulse {
-            from { transform: scale(1); border-color: var(--red-500); }
-            to { transform: scale(1.03); border-color: white; }
-        }
+        @keyframes target-pulse { from { transform: scale(1); } to { transform: scale(1.04); } }
 
-        .mini-svg-stage {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .mini-svg-stage { width: 90%; height: 90%; pointer-events: none; }
 
-        .mini-svg-stage svg {
-            width: 85%;
-            height: 85%;
-        }
-
-        /* === TOAST SYSTEM === */
+        /* --- Toast Messaging --- */
         .toast-container {
             position: fixed;
-            bottom: 80px;
+            bottom: 90px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
@@ -267,86 +243,18 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-            border: 2px solid var(--indigo-500);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+            border-width: 3px;
             margin-bottom: 10px;
             animation: toast-in 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
         }
 
-        .toast.hide {
-            animation: toast-out 0.4s ease forwards;
-        }
+        @keyframes toast-in { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        @keyframes toast-in {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        .toast-msg { font-size: 1.2rem; font-weight: 900; }
+        .toast-ctx { font-size: 0.75rem; color: var(--slate-400); display: block; margin-bottom: 2px; }
 
-        @keyframes toast-out {
-            to { transform: translateY(20px); opacity: 0; }
-        }
-
-        .toast-content {
-            flex: 1;
-            text-align: right;
-        }
-
-        .toast-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--slate-400);
-            display: block;
-        }
-
-        .toast-message {
-            font-size: 1rem;
-            font-weight: 900;
-        }
-
-        .toast-icon {
-            font-size: 1.5rem;
-        }
-
-        /* === HISTORY LOG === */
-        .log-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: var(--slate-800);
-            border-top: 1px solid var(--slate-700);
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .log-toggle-label {
-            font-size: 0.85rem;
-            font-weight: 900;
-            color: var(--slate-300);
-        }
-
-        .question-log {
-            max-height: 0;
-            overflow: hidden;
-            background: var(--slate-900);
-            transition: max-height 0.3s ease;
-        }
-
-        .question-log.open {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .log-entry {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--slate-800);
-            font-size: 0.8rem;
-        }
-
-        /* === BOTTOM ACTION BAR === */
+        /* --- Bottom Bar --- */
         .action-bar {
             display: flex;
             gap: 10px;
@@ -359,39 +267,28 @@
 
         .action-btn {
             flex: 1;
-            min-height: 52px;
+            min-height: 54px;
             border: none;
             border-radius: 16px;
-            font-family: 'Heebo', sans-serif;
-            font-size: 0.9rem;
+            font-family: inherit;
+            font-size: 1rem;
             font-weight: 900;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            transition: all 0.2s;
+            transition: transform 0.1s;
         }
+
+        .action-btn:active { transform: scale(0.96); }
 
         .btn-ask { background: var(--indigo-600); color: white; }
-        .btn-hint { background: var(--slate-700); color: var(--yellow-500); border: 1px solid rgba(234,179,8,0.2); }
-        .btn-accuse { background: var(--slate-700); color: var(--red-500); border: 1px solid rgba(239,68,68,0.2); }
+        .btn-hint { background: var(--slate-700); color: var(--yellow-500); border: 1px solid rgba(234, 179, 8, 0.2); }
+        .btn-accuse { background: var(--slate-700); color: var(--red-500); border: 1px solid rgba(239, 68, 68, 0.2); }
         .btn-accuse.active { background: var(--red-500); color: white; }
 
-        /* === BOTTOM SHEET === */
-        .bottom-sheet-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            backdrop-filter: blur(4px);
-        }
-
-        .bottom-sheet-overlay.open { opacity: 1; pointer-events: all; }
-
+        /* --- Bottom Sheet & Categories Fix --- */
         .bottom-sheet {
             position: fixed;
             bottom: 0;
@@ -401,37 +298,84 @@
             border-radius: 24px 24px 0 0;
             z-index: 101;
             transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
-            max-height: 70dvh;
+            transition: transform 0.4s ease;
+            max-height: 65dvh;
             display: flex;
             flex-direction: column;
+            border-top: 4px solid var(--indigo-500);
         }
 
         .bottom-sheet.open { transform: translateY(0); }
+        .sheet-body { padding: 20px; overflow-y: auto; flex: 1; }
+        
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 4px 16px 4px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            flex-wrap: nowrap;
+        }
 
-        .sheet-handle { width: 40px; height: 5px; background: var(--slate-600); border-radius: 3px; margin: 12px auto; }
-        .sheet-header { padding: 0 20px 15px; font-size: 1.1rem; font-weight: 900; color: var(--indigo-300); }
-        .sheet-body { padding: 16px; overflow-y: auto; flex: 1; }
+        .category-tabs::-webkit-scrollbar { display: none; }
 
-        .category-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch; }
-        .category-tab { padding: 10px 18px; border-radius: 12px; background: var(--slate-700); color: var(--slate-300); font-weight: 700; border: none; white-space: nowrap; font-family: 'Heebo', sans-serif; }
-        .category-tab.active { background: var(--indigo-600); color: white; }
+        .category-tab {
+            padding: 10px 18px;
+            border-radius: 12px;
+            background: var(--slate-700);
+            color: var(--slate-300);
+            font-weight: 900;
+            border: 1px solid var(--slate-600);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
 
-        .trait-chips { display: flex; flex-wrap: wrap; gap: 10px; }
-        .trait-chip { padding: 14px 22px; border-radius: 14px; background: var(--slate-700); color: var(--slate-100); font-weight: 900; border: 2px solid var(--slate-600); font-family: 'Heebo', sans-serif; }
-        .trait-chip.asked { opacity: 0.3; pointer-events: none; }
+        .category-tab.active { background: var(--indigo-600); color: white; border-color: var(--indigo-400); }
 
-        .sheet-footer { padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: 1px solid var(--slate-700); }
+        .trait-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .trait-chip {
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: var(--slate-700);
+            color: white;
+            font-weight: 900;
+            border: 2px solid var(--slate-600);
+            text-align: center;
+            min-width: 80px;
+        }
+        .trait-chip.asked { opacity: 0.2; pointer-events: none; }
 
-        /* MODALS */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        /* --- Modals --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; backdrop-filter: blur(5px); }
         .modal-overlay.open { display: flex; }
         .modal-box { background: var(--slate-800); padding: 30px; border-radius: 28px; border: 2px solid var(--slate-700); width: 100%; max-width: 360px; text-align: center; }
-        .modal-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 15px; }
-        .modal-btn { width: 100%; min-height: 56px; border: none; border-radius: 18px; background: var(--indigo-600); color: white; font-weight: 900; font-size: 1.2rem; }
+        .modal-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 12px; }
+        .modal-btn { width: 100%; min-height: 56px; border: none; border-radius: 18px; background: var(--indigo-600); color: white; font-weight: 900; font-size: 1.2rem; margin-top: 15px; }
 
-        /* ANIMATIONS */
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        /* --- Countdown Overlay --- */
+        .countdown-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .countdown-overlay.active { display: flex; }
+        .countdown-title { font-size: 1.5rem; font-weight: 900; color: var(--indigo-400); margin-bottom: 1rem; opacity: 0.8; }
+        .countdown-number { font-size: 8rem; font-weight: 900; color: white; text-shadow: 0 0 30px var(--indigo-600); animation: pop-number 1s infinite; }
+        @keyframes pop-number { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+
+        .log-toggle { padding: 12px; text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--slate-400); cursor: pointer; }
+        .question-log { max-height: 0; overflow: hidden; background: var(--slate-900); transition: max-height 0.3s; }
+        .question-log.open { max-height: 140px; overflow-y: auto; }
+        .log-entry { padding: 10px 16px; border-bottom: 1px solid var(--slate-800); font-size: 0.8rem; display: flex; align-items: center; gap: 8px; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         .animate-float { animation: float 4s ease-in-out infinite; }
         @keyframes blink { 0%, 96%, 98%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
         .animate-blink { animation: blink 5s infinite; }
@@ -439,120 +383,107 @@
 </head>
 
 <body>
-    <!-- TOAST NOTIFICATIONS -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <div class="top-bar-right">
-            <button class="help-btn" onclick="GameLogic.showHelp()">?</button>
-            <div class="game-title">
-                <span>👾 היצור הסודי</span>
-                <span class="game-subtitle">מתחבא. תמצאו אותו!</span>
-            </div>
-        </div>
-        <div class="stat-item">
-            <span class="stat-label">מטבעות</span>
-            <div class="coins-display" id="coins-container"></div>
-        </div>
+    <!-- COUNTDOWN OVERLAY -->
+    <div id="countdown-overlay" class="countdown-overlay">
+        <span id="countdown-round-text" class="countdown-title">סיבוב מתחיל!</span>
+        <span id="countdown-number" class="countdown-number">3</span>
     </div>
 
-    <!-- CREATURE GRID -->
-    <div class="grid-area">
-        <div class="onboarding-hint" id="onboardingHint">
-            💡 טיפ: גע ביצור כדי לפסול אותו מהרשימה
+    <div class="toast-container" id="toastContainer"></div>
+
+    <header class="top-bar">
+        <div class="top-bar-right">
+            <button class="help-btn" onclick="GameLogic.showHelp()">?</button>
+            <span class="game-title">היצור הסודי מתחבא! מצאו אותו!</span>
         </div>
+        
+        <!-- Progress System Badge: Updated Order & Modern Icon -->
+        <div class="header-progress-pill">
+            <div class="stat-badge" title="סיבוב נוכחי">
+                <span class="stat-label-text">סיבוב</span>
+                <span id="rounds-val">1</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-badge" title="ניצחונות">
+                <!-- Minimalist Vector Trophy Icon -->
+                <svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--yellow-500)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                    <path d="M4 22h16"></path>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                </svg>
+                <span id="wins-val">0</span>
+            </div>
+            <button onclick="GameLogic.resetStats()" class="reset-action" title="איפוס סטטיסטיקות">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+            </button>
+        </div>
+
+        <div class="coins-display" id="coins-container"></div>
+    </header>
+
+    <div class="grid-area">
+        <div class="onboarding-hint" id="onboardingHint">💡 טיפ: געו ביצור שלא מתאים כדי לפסול אותו</div>
         <div class="creature-grid" id="creatures-grid"></div>
     </div>
 
-    <!-- HISTORY LOG -->
-    <div class="log-toggle" onclick="toggleLog()">
-        <span class="log-toggle-label" id="log-label">היסטוריה (0)</span>
-        <span id="logArrow">▲</span>
-    </div>
+    <div class="log-toggle" onclick="toggleLog()">היסטוריה <span id="logArrow">▲</span></div>
     <div class="question-log" id="questionLog"></div>
 
-    <!-- BOTTOM ACTION BAR -->
     <div class="action-bar">
-        <button class="action-btn btn-ask" onclick="openSheet()">❓ שאל שאלה</button>
+        <button class="action-btn btn-ask" onclick="openSheet()">❓ שאלה</button>
         <button class="action-btn btn-hint" id="btn-hint" onclick="GameLogic.buyHint()">💡 רמז</button>
         <button class="action-btn btn-accuse" id="btn-accuse" onclick="GameLogic.toggleAccuseMode()">🎯 ניחוש</button>
     </div>
 
-    <!-- QUESTION BOTTOM SHEET -->
-    <div class="bottom-sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+    <div class="bottom-sheet-overlay" id="sheetOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; z-index:100;" onclick="closeSheet()"></div>
     <div class="bottom-sheet" id="questionSheet">
-        <div class="sheet-handle"></div>
-        <div class="sheet-header">שאל על היצור הסודי</div>
+        <div style="width:40px; height:5px; background:#444; margin:10px auto; border-radius:3px;"></div>
         <div class="sheet-body">
             <div class="category-tabs" id="category-tabs"></div>
             <div class="trait-chips" id="trait-chips"></div>
         </div>
-        <div class="sheet-footer">
-            <p style="text-align: center; color: var(--slate-400); font-size: 0.85rem;">בחר מאפיין כדי לקבל תשובה מיידית</p>
-        </div>
     </div>
 
-    <!-- RESULT MODAL -->
     <div class="modal-overlay" id="modal">
-        <div class="modal-box" id="modal-content">
+        <div class="modal-box">
             <h2 class="modal-title" id="modal-title"></h2>
-            <p style="margin-bottom: 25px; color: var(--slate-300); font-size: 1.1rem;" id="modal-message"></p>
-            <button class="modal-btn" onclick="GameLogic.init()">יאללה, עוד סיבוב!</button>
+            <p id="modal-message" style="color: var(--slate-300); margin-bottom: 20px; font-size: 1.1rem;"></p>
+            <button class="modal-btn" onclick="GameLogic.init()">סיבוב חדש!</button>
         </div>
     </div>
 
-    <!-- HELP MODAL -->
     <div class="modal-overlay" id="help-modal">
-        <div class="modal-box" style="position:relative; text-align: right; max-width: 400px;">
-            <button style="position: absolute; top: 15px; left: 15px; background: none; border: none; color: white; font-size: 1.5rem;" onclick="GameLogic.closeHelp()">✕</button>
+        <div class="modal-box" style="text-align: right;">
             <h2 style="color: var(--indigo-400); margin-bottom: 15px;">📜 איך משחקים?</h2>
             <div style="color: var(--slate-300); font-size: 0.95rem; line-height: 1.6;">
-                <p style="margin-bottom: 15px; border-right: 3px solid var(--indigo-500); padding-right: 10px;">
-                    <strong>המטרה:</strong> להשתמש ביכולת הסקה כדי לבודד את היצור הסודי מתוך קבוצת חשודים.
-                </p>
+                <p style="margin-bottom: 12px; font-weight: 700; color: white;">המטרה: למצוא את היצור שהתחבא!</p>
                 <ul style="list-style: none;">
-                    <li style="margin-bottom: 10px;">• <strong>פסילה:</strong> הקש על יצור שאינו מתאים לסימון "פסול".</li>
-                    <li style="margin-bottom: 10px;">• <strong>שאלה:</strong> בחר מאפיין כדי לצמצם את האפשרויות.</li>
-                    <li style="margin-bottom: 10px;">• <strong>רמז:</strong> השתמש במטבעות כדי לקבל מידע אמין שחושף תכונה של היצור הסודי.</li>
-                    <li style="margin-bottom: 10px;">• <strong>ניחוש:</strong> כשאתה בטוח, הפעל "🎯 ניחוש" ובחר את היצור.</li>
+                    <li style="margin-bottom: 10px;">• <b>שואלים שאלות:</b> בודקים תכונות (צבע, גוף וכו').</li>
+                    <li style="margin-bottom: 10px;">• <b>פסילה:</b> געו ביצור שאינו מתאים כדי להוציאו מהמשחק.</li>
+                    <li style="margin-bottom: 10px;">• <b>רמז:</b> המטבעות חושפים מידע ודאי על היצור הסודי.</li>
+                    <li style="margin-bottom: 10px;">• <b>ניחוש:</b> בטוחים? לחצו "🎯 ניחוש" ואז על היצור.</li>
+                    <li style="margin-bottom: 10px;">• <b>ניקוד:</b> מקבלים נקודות על כל ניחוש נכון. אלופים!</li>
                 </ul>
             </div>
-            <button class="modal-btn" style="margin-top: 25px;" onclick="GameLogic.closeHelp()">הבנתי, בואו נשחק!</button>
+            <button class="modal-btn" onclick="GameLogic.closeHelp()">הבנתי, בואו נשחק!</button>
         </div>
     </div>
 
     <script>
-        /**
-         * מנוע אודיו מבוסס Web Audio API
-         */
         const AudioEngine = {
             ctx: null,
-            init() {
-                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                if (this.ctx.state === 'suspended') this.ctx.resume();
-            },
-            playTone(freq, type, duration, vol = 0.1) {
-                if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                gain.gain.setValueAtTime(0, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + duration);
-            },
-            playClick() { this.playTone(600, 'sine', 0.1, 0.05); },
-            playEliminate() { this.playTone(300, 'triangle', 0.15, 0.05); },
-            playSuccess() { this.playTone(523.25, 'sine', 0.15, 0.1); setTimeout(() => this.playTone(659.25, 'sine', 0.2, 0.1), 100); },
-            playError() { this.playTone(300, 'sawtooth', 0.2, 0.08); setTimeout(() => this.playTone(250, 'sawtooth', 0.3, 0.08), 150); },
-            playMagic() { [440, 554, 659, 880].forEach((freq, i) => setTimeout(() => this.playTone(freq, 'sine', 0.4, 0.05), i * 60)); },
-            playWin() { [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => setTimeout(() => this.playTone(freq, 'square', 0.4, 0.05), i * 100)); },
-            playLose() { [440, 415, 392, 349].forEach((freq, i) => setTimeout(() => this.playTone(freq, 'sawtooth', 0.5, 0.08), i * 200)); }
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); },
+            play(f, t, d, v = 0.1) { if (!this.ctx) return; const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.type = t; o.frequency.setValueAtTime(f, this.ctx.currentTime); g.gain.setValueAtTime(v, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + d); o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + d); },
+            click() { this.play(600, 'sine', 0.1, 0.05); },
+            eliminate() { this.play(300, 'triangle', 0.15, 0.05); },
+            success() { this.play(523, 'sine', 0.15, 0.1); setTimeout(() => this.play(659, 'sine', 0.2, 0.1), 100); },
+            error() { this.play(200, 'sawtooth', 0.3, 0.08); },
+            magic() { [440, 554, 659, 880].forEach((f, i) => setTimeout(() => this.play(f, 'sine', 0.4, 0.05), i * 60)); },
+            tick() { this.play(800, 'sine', 0.1, 0.03); },
+            go() { this.play(1000, 'sine', 0.3, 0.1); }
         };
 
         const TraitDB = {
@@ -570,243 +501,253 @@
         };
 
         const SVGCreator = {
-            generate(creature) {
-                const colorObj = TraitDB.colors.find(c => c.id === creature.color);
-                const isRound = creature.body === 'round', isTriangle = creature.body === 'triangle';
-                const isOneEye = creature.eyes === '1', acc = creature.accessory;
-                const gradId = `grad_${creature.id}_${creature.color}`;
-                const fD = (Math.random() * -4).toFixed(2), bD = (Math.random() * -5).toFixed(2);
-
-                let svg = `<svg viewBox="0 0 100 100" class="animate-float" style="animation-delay: ${fD}s" xmlns="http://www.w3.org/2000/svg">`;
-                svg += `<defs><radialGradient id="${gradId}" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="${colorObj.hex}" /><stop offset="100%" stop-color="${colorObj.dark}" /></radialGradient></defs>`;
-                svg += `<ellipse cx="50" cy="90" rx="30" ry="6" fill="rgba(0,0,0,0.3)" />`;
-                svg += `<path d="M 35 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" /><path d="M 55 80 v 10 a 5 5 0 0 0 10 0 v -10" fill="${colorObj.dark}" />`;
-
-                if (isTriangle) {
-                    svg += `<path d="M 32 60 Q 12 62 14 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/><path d="M 68 60 Q 88 62 86 50" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
-                    svg += `<path d="M 50 20 Q 55 20 58 26 L 83 76 Q 86 82 80 85 L 20 85 Q 14 82 17 76 L 42 26 Q 45 20 50 20 Z" fill="url(#${gradId})" />`;
+            generate(c) {
+                const col = TraitDB.colors.find(x => x.id === c.color);
+                const isR = c.body === 'round', isT = c.body === 'triangle', is1 = c.eyes === '1', acc = c.accessory;
+                const gId = `g_${c.id}_${c.color}`, fD = (Math.random() * -4).toFixed(2), bD = (Math.random() * -5).toFixed(2);
+                let s = `<svg viewBox="0 0 100 100" class="animate-float" style="animation-delay:${fD}s">`;
+                s += `<defs><radialGradient id="${gId}" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="${col.hex}"/><stop offset="100%" stop-color="${col.dark}"/></radialGradient></defs>`;
+                s += `<ellipse cx="50" cy="90" rx="30" ry="6" fill="rgba(0,0,0,0.2)"/><path d="M35 80v10a5 5 0 0 0 10 0v-10" fill="${col.dark}"/><path d="M55 80v10a5 5 0 0 0 10 0 v-10" fill="${col.dark}"/>`;
+                if (isT) {
+                    s += `<path d="M32 60Q12 62 14 50" fill="none" stroke="${col.dark}" stroke-width="8" stroke-linecap="round"/><path d="M68 60Q88 62 86 50" fill="none" stroke="${col.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                    s += `<path d="M50 20Q55 20 58 26L83 76Q86 82 80 85L20 85Q14 82 17 76L42 26Q45 20 50 20Z" fill="url(#${gId})"/>`;
                 } else {
-                    svg += `<path d="M 20 60 Q 5 60 15 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/><path d="M 80 60 Q 95 60 85 75" fill="none" stroke="${colorObj.dark}" stroke-width="8" stroke-linecap="round"/>`;
-                    if (isRound) svg += `<ellipse cx="50" cy="55" rx="35" ry="32" fill="url(#${gradId})" />`;
-                    else svg += `<rect x="20" y="25" width="60" height="60" rx="15" fill="url(#${gradId})" />`;
+                    s += `<path d="M20 60Q5 60 15 75" fill="none" stroke="${col.dark}" stroke-width="8" stroke-linecap="round"/><path d="M80 60Q95 60 85 75" fill="none" stroke="${col.dark}" stroke-width="8" stroke-linecap="round"/>`;
+                    if (isR) s += `<ellipse cx="50" cy="55" rx="35" ry="32" fill="url(#${gId})"/>`;
+                    else s += `<rect x="20" y="25" width="60" height="60" rx="15" fill="url(#${gId})"/>`;
                 }
-
-                const fO = isTriangle ? 4 : 0;
-                let eX1 = isTriangle ? 36 : 32, eX2 = isTriangle ? 64 : 68;
-                const bY = 60 + fO, mY = 70 + fO, eY = 48 + fO;
-
-                if (isOneEye) {
-                    svg += `<ellipse cx="32" cy="${bY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/><ellipse cx="68" cy="${bY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
-                    svg += `<path d="M 45 ${mY} Q 50 ${mY+5} 55 ${mY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
-                    svg += `<g class="animate-blink" style="transform-origin: 50px ${eY}px; animation-delay: ${bD}s"><circle cx="50" cy="${eY}" r="14" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="50" cy="${eY}" r="6" fill="#0f172a"/></g>`;
+                const fO = isT ? 4 : 0, eY = 48 + fO, bY = 60 + fO, mY = 70 + fO;
+                let eX1 = isT ? 36 : 32, eX2 = isT ? 64 : 68;
+                if (is1) {
+                    s += `<ellipse cx="32" cy="${bY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/><ellipse cx="68" cy="${bY}" rx="6" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    s += `<path d="M45 ${mY}Q50 ${mY+5} 55 ${mY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
+                    s += `<g class="animate-blink" style="transform-origin:50px ${eY}px;animation-delay:${bD}s"><circle cx="50" cy="${eY}" r="14" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="50" cy="${eY}" r="6" fill="#0f172a"/></g>`;
                 } else {
-                    svg += `<ellipse cx="${eX1-6}" cy="${bY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/><ellipse cx="${eX2+6}" cy="${bY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
-                    svg += `<path d="M 45 ${mY} Q 50 ${mY+5} 55 ${mY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
-                    svg += `<g class="animate-blink" style="transform-origin: ${eX1}px ${eY}px; animation-delay: ${bD}s"><circle cx="${eX1}" cy="${eY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="${eX1}" cy="${eY}" r="4" fill="#0f172a"/></g>`;
-                    svg += `<g class="animate-blink" style="transform-origin: ${eX2}px ${eY}px; animation-delay: ${bD}s"><circle cx="${eX2}" cy="${eY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="${eX2}" cy="${eY}" r="4" fill="#0f172a"/></g>`;
+                    s += `<ellipse cx="${eX1-6}" cy="${bY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/><ellipse cx="${eX2+6}" cy="${bY}" rx="5" ry="3" fill="#ffb3ba" opacity="0.6"/>`;
+                    s += `<path d="M45 ${mY}Q50 ${mY+5} 55 ${mY}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>`;
+                    s += `<g class="animate-blink" style="transform-origin:${eX1}px ${eY}px;animation-delay:${bD}s"><circle cx="${eX1}" cy="${eY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="${eX1}" cy="${eY}" r="4" fill="#0f172a"/></g>`;
+                    s += `<g class="animate-blink" style="transform-origin:${eX2}px ${eY}px;animation-delay:${bD}s"><circle cx="${eX2}" cy="${eY}" r="10" fill="white" stroke="#0f172a" stroke-width="2"/><circle cx="${eX2}" cy="${eY}" r="4" fill="#0f172a"/></g>`;
                 }
-
                 if (acc === 'glasses') {
-                    if (isOneEye) svg += `<circle cx="50" cy="${eY}" r="18" fill="none" stroke="#1e293b" stroke-width="4"/><line x1="15" y1="${eY}" x2="32" y2="${eY}" stroke="#1e293b" stroke-width="4"/><line x1="68" y1="${eY}" x2="85" y2="${eY}" stroke="#1e293b" stroke-width="4"/>`;
-                    else svg += `<circle cx="${eX1}" cy="${eY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/><circle cx="${eX2}" cy="${eY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/><line x1="${eX1+14}" y1="${eY}" x2="${eX2-14}" y2="${eY}" stroke="#1e293b" stroke-width="3"/>`;
+                    if (is1) s += `<circle cx="50" cy="${eY}" r="18" fill="none" stroke="#1e293b" stroke-width="4"/><line x1="15" y1="${eY}" x2="32" y2="${eY}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/><line x1="68" y1="${eY}" x2="85" y2="${eY}" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>`;
+                    else s += `<circle cx="${eX1}" cy="${eY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/><circle cx="${eX2}" cy="${eY}" r="14" fill="none" stroke="#1e293b" stroke-width="3"/><line x1="${eX1+14}" y1="${eY}" x2="${eX2-14}" y2="${eY}" stroke="#1e293b" stroke-width="3"/>`;
                 } else if (acc === 'bowtie') {
-                    const btY = isTriangle ? 80 : 82;
-                    svg += `<polygon points="50,${btY} 40,${btY-5} 40,${btY+5}" fill="#ef4444" /><polygon points="50,${btY} 60,${btY-5} 60,${btY+5}" fill="#ef4444" /><circle cx="50" cy="${btY}" r="3" fill="white" />`;
+                    const btY = isT ? 80 : 82;
+                    s += `<polygon points="50,${btY} 40,${btY-5} 40,${btY+5}" fill="#ef4444"/><polygon points="50,${btY} 60,${btY-5} 60,${btY+5}" fill="#ef4444"/><circle cx="50" cy="${btY}" r="3" fill="white"/>`;
                 } else if (acc === 'sprout') {
-                    const tY = isTriangle ? 20 : (isRound ? 23 : 25);
-                    svg += `<path d="M 50 ${tY} Q 45 ${tY-10} 55 ${tY-15}" fill="none" stroke="#15803d" stroke-width="2"/><path d="M 55 ${tY-15} Q 60 ${tY-10} 50 ${tY-5} Z" fill="#22c55e" />`;
+                    const tY = isT ? 20 : (isR ? 23 : 25);
+                    s += `<path d="M50 ${tY}Q45 ${tY-10} 55 ${tY-15}" fill="none" stroke="#15803d" stroke-width="2"/><path d="M55 ${tY-15}Q60 ${tY-10} 50 ${tY-5}Z" fill="#22c55e"/>`;
                 } else if (acc === 'hair') {
-                    if (isTriangle) svg += `<path d="M 44 26 Q 47 8 50 15 Q 54 5 57 24 Q 50 20 44 26 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" />`;
-                    else svg += `<path d="M 40 25 Q 44 13 47 24 Q 50 7 53 24 Q 56 15 60 27 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5" />`;
+                    if (isT) s += `<path d="M44 26Q47 8 50 15Q54 5 57 24 Q 50 20 44 26 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5"/>`;
+                    else s += `<path d="M40 25Q44 13 47 24Q50 7 53 24 Q 56 15 60 27 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5"/>`;
                 }
-                svg += `</svg>`;
-                return svg;
+                return s + `</svg>`;
             }
         };
 
         const GameLogic = {
-            creatures: [], secretCreatureId: null, coins: 2, askedQuestions: new Set(),
-            selectedCategory: 'color', accuseMode: false, historyCount: 0, firstActionTaken: false,
+            creatures: [], secretId: null, coins: 2, asked: new Set(), cat: 'color', mode: false, count: 0, first: false,
+            score: 0, round: 1,
 
-            init() {
-                this.coins = 2; this.askedQuestions.clear(); this.accuseMode = false; this.historyCount = 0; this.firstActionTaken = false;
-                this.generateCreatures(10);
-                this.secretCreatureId = this.creatures[Math.floor(Math.random() * this.creatures.length)].id;
-                this.resetUI(); this.renderCoins(); this.renderGrid();
-                document.getElementById('onboardingHint').style.display = 'block';
+            init(isResetStats = false) {
+                if (isResetStats) { this.score = 0; this.round = 1; }
+                this.coins = 2; this.asked.clear(); this.mode = false; this.count = 0; this.first = false;
+                this.generate(9);
+                this.secretId = this.creatures[Math.floor(Math.random()*9)].id;
+                
+                this.resetUI();
+                
+                if (this.round > 1 && !isResetStats) {
+                    this.runCountdown().then(() => {
+                        this.renderGrid();
+                        this.renderCoins();
+                        this.updateStatsUI();
+                    });
+                } else {
+                    this.renderGrid();
+                    this.renderCoins();
+                    this.updateStatsUI();
+                }
+
+                const h = document.getElementById('onboardingHint'); if(h) h.style.display = 'block';
             },
 
-            generateCreatures(n) {
-                this.creatures = [];
-                const rF = (a) => a[Math.floor(Math.random() * a.length)].id;
-                for (let i = 0; i < n; i++) {
-                    this.creatures.push({ id: i+1, name: `יצור #${i+1}`, color: rF(TraitDB.colors), body: rF(TraitDB.bodies), eyes: rF(TraitDB.eyes), accessory: rF(TraitDB.accessories), eliminated: false });
+            async runCountdown() {
+                return new Promise((resolve) => {
+                    const overlay = document.getElementById('countdown-overlay');
+                    const numEl = document.getElementById('countdown-number');
+                    const textEl = document.getElementById('countdown-round-text');
+                    
+                    textEl.textContent = `סיבוב ${this.round} מתחילים!`;
+                    overlay.classList.add('active');
+                    
+                    let count = 3;
+                    numEl.textContent = count;
+                    AudioEngine.tick();
+
+                    const timer = setInterval(() => {
+                        count--;
+                        if (count > 0) {
+                            numEl.textContent = count;
+                            AudioEngine.tick();
+                            numEl.style.animation = 'none';
+                            numEl.offsetHeight; 
+                            numEl.style.animation = null;
+                        } else {
+                            clearInterval(timer);
+                            numEl.textContent = "קדימה!";
+                            AudioEngine.go();
+                            setTimeout(() => {
+                                overlay.classList.remove('active');
+                                resolve();
+                            }, 800);
+                        }
+                    }, 1000);
+                });
+            },
+
+            resetStats() { AudioEngine.click(); this.init(true); },
+
+            updateStatsUI() {
+                const winsEl = document.getElementById('wins-val');
+                const roundsEl = document.getElementById('rounds-val');
+                if (winsEl) winsEl.textContent = this.score;
+                if (roundsEl) roundsEl.textContent = this.round;
+            },
+
+            generate(n) {
+                this.creatures = []; const seen = new Set(); const r = (a) => a[Math.floor(Math.random()*a.length)].id;
+                while(this.creatures.length < n) {
+                    const t = { color: r(TraitDB.colors), body: r(TraitDB.bodies), eyes: r(TraitDB.eyes), accessory: r(TraitDB.accessories) };
+                    const key = Object.values(t).join('|');
+                    if (!seen.has(key)) { seen.add(key); this.creatures.push({ ...t, id: this.creatures.length+1, eliminated: false }); }
                 }
             },
 
             resetUI() {
-                document.getElementById('modal').classList.remove('open');
-                document.getElementById('help-modal').classList.remove('open');
-                document.getElementById('questionLog').innerHTML = '';
-                document.getElementById('questionLog').classList.remove('open');
-                document.getElementById('logArrow').textContent = '▲';
-                document.getElementById('btn-accuse').classList.remove('active');
-                document.getElementById('btn-accuse').textContent = '🎯 ניחוש';
-                this.updateLogLabel();
+                ['modal', 'help-modal', 'questionSheet', 'sheetOverlay'].forEach(id => {
+                    const el = document.getElementById(id); if (el) el.classList.remove('open');
+                    if (id === 'sheetOverlay' && el) el.style.display = 'none';
+                });
+                const log = document.getElementById('questionLog'); if(log) log.innerHTML = '';
+                const btn = document.getElementById('btn-accuse'); if(btn) { btn.classList.remove('active'); btn.textContent = '🎯 ניחוש'; }
+                const label = document.getElementById('log-label'); if(label) label.textContent = 'היסטוריה (0)';
             },
 
             renderCoins() {
-                document.getElementById('coins-container').innerHTML = this.coins > 0 ? Array(this.coins).fill('<span>🪙</span>').join('') : '<span style="font-size:0.7rem; color:var(--slate-600)">אין</span>';
-                document.getElementById('btn-hint').disabled = this.coins < 1;
+                const c = document.getElementById('coins-container'); if(!c) return;
+                c.innerHTML = this.coins > 0 ? Array(this.coins).fill('<span>🪙</span>').join('') : '<span style="font-size:0.7rem; color:#666">אין</span>';
+                const h = document.getElementById('btn-hint'); if(h) h.disabled = this.coins < 1;
             },
 
             renderGrid() {
-                const grid = document.getElementById('creatures-grid'); grid.innerHTML = '';
+                const g = document.getElementById('creatures-grid'); if(!g) return; g.innerHTML = '';
                 this.creatures.forEach(c => {
                     const card = document.createElement('div');
-                    card.className = `mini-card${c.eliminated ? ' eliminated' : ''}${this.accuseMode && !c.eliminated ? ' accuse-target' : ''}`;
+                    card.className = `mini-card${c.eliminated ? ' eliminated' : ''}${this.mode && !c.eliminated ? ' accuse-target' : ''}`;
                     card.onclick = () => {
                         this.triggerAction();
-                        if (this.accuseMode) { if (!c.eliminated) this.accuse(c.id); }
-                        else { this.toggleEliminate(c.id); }
+                        if (this.mode) { if(!c.eliminated) this.accuse(c.id); } else { this.toggle(c.id); }
                     };
                     card.innerHTML = `<div class="mini-svg-stage">${SVGCreator.generate(c)}</div>`;
-                    grid.appendChild(card);
+                    g.appendChild(card);
                 });
             },
 
-            triggerAction() {
-                if (!this.firstActionTaken) {
-                    this.firstActionTaken = true;
-                    document.getElementById('onboardingHint').style.display = 'none';
-                }
-            },
-
-            toggleEliminate(id) {
-                AudioEngine.playEliminate();
-                const c = this.creatures.find(x => x.id === id);
-                if (c) { c.eliminated = !c.eliminated; this.renderGrid(); }
-            },
-
-            toggleAccuseMode() {
-                this.triggerAction();
-                this.accuseMode = !this.accuseMode;
-                const b = document.getElementById('btn-accuse');
-                b.classList.toggle('active', this.accuseMode);
-                b.textContent = this.accuseMode ? '❌ ביטול' : '🎯 ניחוש';
-                AudioEngine.playClick(); this.renderGrid();
-            },
-
-            askQuestionFromChip(valId) {
-                this.triggerAction();
-                const cat = this.selectedCategory;
-                const key = `${cat}-${valId}`;
-                if (this.askedQuestions.has(key)) { AudioEngine.playError(); return; }
-
-                this.askedQuestions.add(key);
-                const secret = this.creatures.find(x => x.id === this.secretCreatureId);
-                const isTrue = secret[cat] === valId;
-                
-                if (isTrue) AudioEngine.playSuccess(); else AudioEngine.playError();
-                
-                const catName = CategoryMap[cat].name;
-                const valName = CategoryMap[cat].db.find(i=>i.id===valId).name;
-                const qText = `האם ה${catName} הוא ${valName}?`;
-                
-                this.logHistory(qText, isTrue, 'question');
-                this.showToast(isTrue ? 'כן!' : 'לא...', isTrue ? 'success' : 'error', qText);
+            triggerAction() { if(!this.first) { this.first = true; const h = document.getElementById('onboardingHint'); if(h) h.style.display = 'none'; } },
+            toggle(id) { AudioEngine.eliminate(); const c = this.creatures.find(x => x.id === id); if(c) { c.eliminated = !c.eliminated; this.renderGrid(); } },
+            toggleAccuseMode() { AudioEngine.click(); this.mode = !this.mode; const b = document.getElementById('btn-accuse'); if(b) { b.classList.toggle('active', this.mode); b.textContent = this.mode ? '❌ ביטול' : '🎯 ניחוש'; } this.renderGrid(); },
+            
+            ask(valId) {
+                const key = `${this.cat}-${valId}`; if (this.asked.has(key)) return; this.asked.add(key);
+                const secret = this.creatures.find(x => x.id === this.secretId); const isT = secret[this.cat] === valId;
+                if(isT) AudioEngine.success(); else AudioEngine.error();
+                const qText = `האם ה${CategoryMap[this.cat].name} הוא ${CategoryMap[this.cat].db.find(i=>i.id===valId).name}?`;
+                this.log(qText, isT, 'question');
+                this.toast(isT ? 'כן! 🎉' : 'לא...', isT ? 'success' : 'error', qText);
                 closeSheet();
             },
 
             buyHint() {
                 if (this.coins < 1) return;
-                this.triggerAction();
-                this.coins--; this.renderCoins(); AudioEngine.playMagic();
-                const secret = this.creatures.find(x => x.id === this.secretCreatureId);
-                const cats = Object.keys(CategoryMap);
-                const cat = cats[Math.floor(Math.random() * cats.length)];
-                const valName = CategoryMap[cat].db.find(i => i.id === secret[cat]).name;
-                
-                const text = `ה${CategoryMap[cat].name} הוא ${valName}`;
-                this.logHistory(text, true, 'hint');
-                this.showToast(valName, 'hint', `רמז: ה${CategoryMap[cat].name} הוא`);
+                const secret = this.creatures.find(x => x.id === this.secretId);
+                const eligibleCategories = Object.keys(CategoryMap).filter(catKey => {
+                    const secretVal = secret[catKey];
+                    if (this.asked.has(`${catKey}-${secretVal}`)) return false;
+                    const allVals = CategoryMap[catKey].db.map(item => item.id);
+                    const others = allVals.filter(v => v !== secretVal);
+                    return !others.every(v => this.asked.has(`${catKey}-${v}`));
+                });
+
+                if (eligibleCategories.length === 0) { this.toast("הכל כבר ידוע!", "error", "לא נשארו רמזים"); return; }
+
+                this.coins--; this.renderCoins(); AudioEngine.magic();
+                const randomCat = eligibleCategories[Math.floor(Math.random() * eligibleCategories.length)];
+                const valId = secret[randomCat];
+                const valName = CategoryMap[randomCat].db.find(i => i.id === valId).name;
+                this.asked.add(`${randomCat}-${valId}`);
+                this.log(`ה${CategoryMap[randomCat].name} הוא ${valName}`, true, 'hint');
+                this.toast(valName, 'hint', `רמז זהב: ה${CategoryMap[randomCat].name} הוא`);
             },
 
-            showToast(msg, type, context) {
-                const container = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.className = 'toast';
-                if (type === 'error') toast.style.borderColor = 'var(--red-500)';
-                if (type === 'success') toast.style.borderColor = 'var(--green-500)';
-                if (type === 'hint') toast.style.borderColor = 'var(--yellow-500)';
-
-                const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : '💡');
-                toast.innerHTML = `<div class="toast-icon">${icon}</div><div class="toast-content"><span class="toast-title">${context}</span><span class="toast-message">${msg}</span></div>`;
-                
-                container.appendChild(toast);
-                setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 3000);
+            toast(msg, type, ctx) {
+                const container = document.getElementById('toastContainer'); if(!container) return;
+                const t = document.createElement('div'); t.className = 'toast';
+                if(type === 'error') t.style.borderColor = 'var(--red-500)'; if(type === 'success') t.style.borderColor = 'var(--green-500)'; if(type === 'hint') t.style.borderColor = 'var(--yellow-500)';
+                t.innerHTML = `<div style="font-size:1.6rem">${type==='success'?'✅':(type==='error'?'❌':'💡')}</div><div style="flex:1;text-align:right"><span class="toast-ctx">${ctx}</span><span class="toast-msg">${msg}</span></div>`;
+                container.appendChild(t); setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; t.style.transition = '0.4s'; setTimeout(() => t.remove(), 400); }, 3000);
             },
 
-            logHistory(text, isTrue, type) {
-                const log = document.getElementById('questionLog');
-                this.historyCount++; this.updateLogLabel();
-                const entry = document.createElement('div');
-                entry.className = 'log-entry';
-                if (type === 'hint') entry.innerHTML = `<span>💡</span><span style="flex:1">${text}</span><span style="color:var(--yellow-500)">רמז</span>`;
-                else entry.innerHTML = `<span>${isTrue?'✅':'❌'}</span><span style="flex:1">${text}</span><span style="font-weight:900; color:${isTrue?'var(--green-500)':'var(--red-500)'}">${isTrue?'כן':'לא'}</span>`;
-                log.prepend(entry);
+            log(txt, isT, type) {
+                const l = document.getElementById('questionLog'); if(!l) return;
+                this.count++; const label = document.getElementById('log-label'); if(label) label.textContent = `היסטוריה (${this.count})`;
+                const e = document.createElement('div'); e.className = 'log-entry';
+                if(type === 'hint') e.innerHTML = `<span>💡</span><span style="flex:1">${txt}</span><span style="color:var(--yellow-500)">רמז</span>`;
+                else e.innerHTML = `<span>${isT?'✅':'❌'}</span><span style="flex:1">${txt}</span><span style="font-weight:900;color:${isT?'var(--green-500)':'var(--red-500)'}">${isT?'כן':'לא'}</span>`;
+                l.prepend(e);
             },
-
-            updateLogLabel() { document.getElementById('log-label').textContent = `היסטוריה (${this.historyCount})`; },
 
             accuse(id) {
-                if (id === this.secretCreatureId) { 
-                    AudioEngine.playWin(); 
-                    this.showModal('שיחקת אותה! 🏆', 'אתה אלוף הבלשים! מצאת את המטרה בול.', 'var(--green-500)'); 
+                const winMsgs = ["אלופי הבלשים! 🏆", "בול בפוני! ⭐", "שיחקתם אותה בענק! 🔥", "היצור נמצא, אתם תותחים! 🎯"];
+                const lossMsgs = ["הוא חמק הפעם! 💨", "כמעט הצלחתם, מנסים שוב? 🕵️", "לא נורא, הסיבוב הבא שלכם! 🚀", "הפעם היצור היה מהיר יותר! 🌀"];
+                
+                if (id === this.secretId) { 
+                    this.score++; AudioEngine.success(); 
+                    this.showModal(winMsgs[Math.floor(Math.random()*winMsgs.length)], 'מצאתם את היצור הסודי והוא נורא שמח!', 'var(--green-500)'); 
+                } else { 
+                    AudioEngine.error(); 
+                    this.showModal(lossMsgs[Math.floor(Math.random()*lossMsgs.length)], 'היצור הסודי הצליח להתחבא הפעם. ממשיכים לחפש?', 'var(--red-500)'); 
                 }
-                else { 
-                    AudioEngine.playLose(); 
-                    this.showModal('אופס! 💨', 'היצור הסודי הצליח להתחמק... נסה שוב!', 'var(--red-500)'); 
-                }
+                this.round++; this.updateStatsUI();
             },
 
-            showModal(t, m, c) {
-                document.getElementById('modal-title').textContent = t;
-                document.getElementById('modal-title').style.color = c;
-                document.getElementById('modal-message').textContent = m;
-                document.getElementById('modal').classList.add('open');
-            },
-
-            showHelp() { AudioEngine.playClick(); document.getElementById('help-modal').classList.add('open'); },
-            closeHelp() { AudioEngine.playClick(); document.getElementById('help-modal').classList.remove('open'); },
+            showModal(t, m, c) { const title = document.getElementById('modal-title'); if(title) { title.textContent = t; title.style.color = c; } document.getElementById('modal-message').textContent = m; document.getElementById('modal').classList.add('open'); },
+            showHelp() { AudioEngine.click(); const h = document.getElementById('help-modal'); if(h) h.classList.add('open'); },
+            closeHelp() { AudioEngine.click(); const h = document.getElementById('help-modal'); if(h) h.classList.remove('open'); },
 
             renderCategoryTabs() {
-                const c = document.getElementById('category-tabs'); c.innerHTML = '';
+                const c = document.getElementById('category-tabs'); if(!c) return; c.innerHTML = '';
                 Object.keys(CategoryMap).forEach(k => {
-                    const btn = document.createElement('button');
-                    btn.className = `category-tab${this.selectedCategory===k?' active':''}`;
+                    const btn = document.createElement('button'); btn.className = `category-tab${this.cat===k?' active':''}`;
                     btn.textContent = `${CategoryMap[k].icon} ${CategoryMap[k].name}`;
-                    btn.onclick = () => { this.selectedCategory = k; this.renderCategoryTabs(); this.renderTraitChips(); };
+                    btn.onclick = () => { AudioEngine.click(); this.cat = k; this.renderCategoryTabs(); this.renderTraitChips(); };
                     c.appendChild(btn);
                 });
             },
 
             renderTraitChips() {
-                const c = document.getElementById('trait-chips'); c.innerHTML = '';
-                CategoryMap[this.selectedCategory].db.forEach(i => {
-                    const isAsked = this.askedQuestions.has(`${this.selectedCategory}-${i.id}`);
-                    const btn = document.createElement('button');
-                    btn.className = `trait-chip${isAsked?' asked':''}`;
-                    btn.textContent = i.name;
-                    if (!isAsked) btn.onclick = () => { this.askQuestionFromChip(i.id); };
+                const c = document.getElementById('trait-chips'); if(!c) return; c.innerHTML = '';
+                CategoryMap[this.cat].db.forEach(i => {
+                    const btn = document.createElement('button'); btn.className = `trait-chip${this.asked.has(`${this.cat}-${i.id}`)?' asked':''}`;
+                    btn.textContent = i.name; btn.onclick = () => { this.ask(i.id); };
                     c.appendChild(btn);
                 });
             }
         };
 
-        function toggleLog() { document.getElementById('questionLog').classList.toggle('open'); document.getElementById('logArrow').textContent = document.getElementById('questionLog').classList.contains('open') ? '▼' : '▲'; }
-        function openSheet() { AudioEngine.playClick(); GameLogic.renderCategoryTabs(); GameLogic.renderTraitChips(); document.getElementById('sheetOverlay').classList.add('open'); document.getElementById('questionSheet').classList.add('open'); }
-        function closeSheet() { document.getElementById('sheetOverlay').classList.remove('open'); document.getElementById('questionSheet').classList.remove('open'); }
+        function toggleLog() { const log = document.getElementById('questionLog'); if(log) log.classList.toggle('open'); const a = document.getElementById('logArrow'); if(a && log) a.textContent = log.classList.contains('open') ? '▼' : '▲'; }
+        function openSheet() { AudioEngine.click(); GameLogic.renderCategoryTabs(); GameLogic.renderTraitChips(); if(document.getElementById('sheetOverlay')) document.getElementById('sheetOverlay').style.display = 'block'; if(document.getElementById('questionSheet')) document.getElementById('questionSheet').classList.add('open'); }
+        function closeSheet() { if(document.getElementById('sheetOverlay')) document.getElementById('sheetOverlay').style.display = 'none'; if(document.getElementById('questionSheet')) document.getElementById('questionSheet').classList.remove('open'); }
 
         window.addEventListener('DOMContentLoaded', () => GameLogic.init());
     </script>
