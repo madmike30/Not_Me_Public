@@ -31,6 +31,7 @@
             --indigo-400: #818cf8;
             --indigo-600: #4f46e5;
             --red-500: #ef4444;
+            --red-600: #dc2626;
             --green-500: #22c55e;
             --green-600: #16a34a;
             --yellow-500: #eab308;
@@ -210,6 +211,59 @@
 
         .mini-svg-stage { width: 90%; height: 90%; pointer-events: none; }
 
+        /* --- Smart Isolation UI (זה הוא?) --- */
+        .isolation-overlay {
+            position: absolute;
+            inset: -2px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+            border-radius: 16px;
+            border: 3px solid var(--indigo-500);
+            animation: spring-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            padding: 10px;
+        }
+
+        @keyframes spring-in {
+            0% { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .isolation-title {
+            color: white;
+            font-weight: 900;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .isolation-btns {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-yes, .btn-no {
+            flex: 1;
+            padding: 10px 4px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            transition: transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-yes { background: var(--green-500); color: white; border-bottom: 3px solid var(--green-600); }
+        .btn-no { background: var(--red-500); color: white; border-bottom: 3px solid var(--red-600); }
+        .btn-yes:active, .btn-no:active { transform: translateY(2px); border-bottom-width: 1px; }
+
         /* --- Toast Messaging --- */
         .toast-container {
             position: fixed;
@@ -293,14 +347,14 @@
         .category-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch; }
         .category-tab {
             padding: 10px 18px; border-radius: 12px; background: var(--slate-700); color: var(--slate-300);
-            font-weight: 900; border: 1px solid var(--slate-600); white-space: nowrap; flex-shrink: 0;
+            font-weight: 900; border: 1px solid var(--slate-600); white-space: nowrap; flex-shrink: 0; cursor: pointer; font-family: inherit;
         }
         .category-tab.active { background: var(--indigo-600); color: white; border-color: var(--indigo-400); }
 
         .trait-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         .trait-chip {
             padding: 14px 18px; border-radius: 14px; background: var(--slate-700); color: white;
-            font-weight: 900; border: 2px solid var(--slate-600); text-align: center; min-width: 80px;
+            font-weight: 900; border: 2px solid var(--slate-600); text-align: center; min-width: 80px; cursor: pointer; font-family: inherit;
         }
         .trait-chip.asked { opacity: 0.2; pointer-events: none; }
 
@@ -309,7 +363,7 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: var(--slate-800); padding: 30px; border-radius: 28px; border: 2px solid var(--slate-700); width: 100%; max-width: 360px; text-align: center; }
         .modal-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 12px; }
-        .modal-btn { width: 100%; min-height: 56px; border: none; border-radius: 18px; background: var(--indigo-600); color: white; font-weight: 900; font-size: 1.2rem; margin-top: 15px; }
+        .modal-btn { width: 100%; min-height: 56px; border: none; border-radius: 18px; background: var(--indigo-600); color: white; font-weight: 900; font-size: 1.2rem; margin-top: 15px; cursor: pointer; font-family: inherit;}
 
         /* --- Overlays --- */
         .countdown-overlay {
@@ -345,11 +399,11 @@
     <header class="top-bar">
         <div class="top-bar-right">
             <button class="help-btn" id="mainHelpBtn" onclick="GameLogic.showHelp()">?</button>
-            <span class="game-title">היצור הסודי מתחבא!</span>
+            <span class="game-title">היצור הסודי חמק שוב! מצאו אותו!</span>
         </div>
         
         <div class="header-progress-pill">
-            <div class="stat-badge">
+            <div class="stat-badge" title="סיבוב נוכחי">
                 <span class="stat-label-text">סיבוב</span>
                 <span id="rounds-val">1</span>
             </div>
@@ -388,22 +442,20 @@
         </div>
     </div>
 
-    <!-- MAIN MODAL -->
-    <div id="modal" class="modal-overlay">
+    <div class="modal-overlay" id="modal">
         <div class="modal-box">
-            <h2 id="modal-title" class="modal-title"></h2>
+            <h2 class="modal-title" id="modal-title"></h2>
             <p id="modal-message" style="color: var(--slate-300); margin-bottom: 20px; font-size: 1.1rem;"></p>
-            <button id="modal-action-btn" class="modal-btn">קדימה!</button>
+            <button class="modal-btn" id="modal-action-btn" onclick="GameLogic.init(false)">נמשיך במרדף!</button>
         </div>
     </div>
 
-    <!-- HELP MODAL -->
-    <div id="help-modal" class="modal-overlay">
+    <div class="modal-overlay" id="help-modal">
         <div class="modal-box" style="text-align: right; border: 3px solid var(--indigo-500); position: relative;">
             <h2 style="color: var(--indigo-400); margin-bottom: 15px; font-size: 1.8rem; text-align: center;">איך משחקים? 🕵️</h2>
             <div style="color: var(--slate-100); font-size: 1.05rem; line-height: 1.6;">
                 <p style="margin-bottom: 15px; font-weight: 900; color: white; border-bottom: 2px solid var(--slate-700); padding-bottom: 5px;">המטרה: למצוא את היצור הסודי בשיא המהירות!</p>
-                <ul style="list-style: none; padding: 0;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
                     <li style="margin-bottom: 12px; display: flex; gap: 10px;">
                         <span>❓</span>
                         <div><strong>שואלים שאלה:</strong> בוחרים צבע או צורה ומגלים פרטים.</div>
@@ -417,7 +469,7 @@
                         <div><strong>מהרו!</strong> הזמן אוזל בכל סיבוב. אם הזמן נגמר, הפסדתם.</div>
                     </li>
                 </ul>
-                <p style="margin-top: 15px; background: var(--indigo-900-30); padding: 10px; border-radius: 12px; font-weight: 700; text-align: center;">געו בכל מקום כדי להתחיל!</p>
+                <p style="margin-top: 15px; background: var(--yellow-900-30); padding: 10px; border-radius: 12px; font-weight: 700; text-align: center; color: var(--yellow-500);">געו בכל מקום כדי להתחיל!</p>
             </div>
         </div>
     </div>
@@ -454,8 +506,9 @@
             generate(c) {
                 const col = TraitDB.colors.find(x => x.id === c.color);
                 const isR = c.body === 'round', isT = c.body === 'triangle', is1 = c.eyes === '1', acc = c.accessory;
-                const gId = `g_${c.id}_${c.color}`, fD = (Math.random() * -4).toFixed(2), bD = (Math.random() * -5).toFixed(2);
-                let s = `<svg viewBox="0 0 100 100" class="animate-float" style="animation-delay:${fD}s">`;
+                const gId = `g_${c.id}_${c.color}`;
+                const fD = (Math.random() * -4).toFixed(2), bD = (Math.random() * -5).toFixed(2);
+                let s = `<svg viewBox="0 0 100 100" class="animate-float" style="animation-delay:${fD}s; width: 100%; height: 100%; pointer-events: none;">`;
                 s += `<defs><radialGradient id="${gId}" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="${col.hex}"/><stop offset="100%" stop-color="${col.dark}"/></radialGradient></defs>`;
                 s += `<ellipse cx="50" cy="90" rx="30" ry="6" fill="rgba(0,0,0,0.2)"/><path d="M35 80v10a5 5 0 0 0 10 0v-10" fill="${col.dark}"/><path d="M55 80v10a5 5 0 0 0 10 0 v-10" fill="${col.dark}"/>`;
                 if (isT) {
@@ -504,11 +557,11 @@
                 this.stopTimer();
                 if (isHardReset) { this.round = 1; this.coins = 2; }
                 this.asked.clear(); this.mode = false; this.count = 0;
+                
                 this.generate(9);
                 this.secretId = this.creatures[Math.floor(Math.random()*9)].id;
                 this.resetUI();
                 
-                // חישוב זמן הסיבוב: יורד בכל סיבוב ב-5 שניות עד למינימום של 20
                 this.initialTime = Math.max(20, 60 - (this.round - 1) * 5);
                 this.timeLeft = this.initialTime;
 
@@ -580,7 +633,7 @@
                     const overlay = document.getElementById('countdown-overlay');
                     const numEl = document.getElementById('countdown-number');
                     const textEl = document.getElementById('countdown-round-text');
-                    textEl.textContent = this.round === 1 ? "המרדף מתחיל! מצאו אותו..." : "הוא חמק שוב! מחפשים...";
+                    textEl.textContent = this.round === 1 ? "המרדף מתחיל!" : "הוא חמק שוב! מחפשים...";
                     overlay.classList.add('active');
                     let count = 3; numEl.textContent = count; AudioEngine.tick();
                     const timer = setInterval(() => {
@@ -610,11 +663,39 @@
 
             renderGrid() {
                 const g = document.getElementById('creatures-grid'); if(!g) return; g.innerHTML = '';
+                
+                // חישוב יצורים פעילים לצורך הצגת מודל "זה הוא?"
+                const activeOnes = this.creatures.filter(c => !c.eliminated);
+                const isLastOne = activeOnes.length === 1;
+
                 this.creatures.forEach(c => {
                     const card = document.createElement('div');
-                    card.className = `mini-card${c.eliminated ? ' eliminated' : ''}${this.mode && !c.eliminated ? ' accuse-target' : ''}`;
-                    card.onclick = () => { if (this.mode) { if(!c.eliminated) this.accuse(c.id); } else { this.toggle(c.id); } };
-                    card.innerHTML = `<div class="mini-svg-stage">${SVGCreator.generate(c)}</div>`;
+                    const isActive = !c.eliminated;
+                    card.className = `mini-card${c.eliminated ? ' eliminated' : ''}${this.mode && isActive ? ' accuse-target' : ''}`;
+                    
+                    // מניעת לחיצה רגילה אם זה החשוד האחרון (כדי להכריח שימוש בכפתורי הבועה)
+                    card.onclick = () => { 
+                        if (isLastOne && isActive) return; 
+                        if (this.mode) { if(isActive) this.accuse(c.id); } 
+                        else { this.toggle(c.id); } 
+                    };
+                    
+                    let content = `<div class="mini-svg-stage">${SVGCreator.generate(c)}</div>`;
+                    
+                    // שכבת בידוד מודרנית ("זה הוא?") כשנשאר רק אחד
+                    if (isLastOne && isActive) {
+                        content += `
+                            <div class="isolation-overlay">
+                                <div class="isolation-title">זה הוא?</div>
+                                <div class="isolation-btns">
+                                    <button onclick="event.stopPropagation(); GameLogic.accuse(${c.id})" class="btn-yes">כן!</button>
+                                    <button onclick="event.stopPropagation(); GameLogic.toggle(${c.id})" class="btn-no">לא</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    card.innerHTML = content;
                     g.appendChild(card);
                 });
             },
@@ -676,7 +757,6 @@
                 if (id === this.secretId) {
                     AudioEngine.success();
                     
-                    // בדיקה אם השחקן ניצח את המשחק (סיבוב 12)
                     if (this.round === 12) {
                         this.showModal("ניצחון מוחלט! 🏆", "כל הכבוד! הצלחתם למצוא את כל היצורים ולסיים את המרדף בהצלחה!", "var(--green-500)");
                         actionBtn.innerText = "משחק חדש";
